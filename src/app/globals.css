@@ -1,26 +1,156 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Default: Dark Theme */
+  --bg: #0A0C10;
+  --surface: #1B2430;
+  --surface-hover: #232F3F;
+  --signal-blue: #5B6EF3;
+  --signal-blue-hover: #7A8BFF;
+  --signal-lime: #D6EE3C;
+  --text: #EDEEF2;
+  --text-secondary: #B8BEC9;
+  --text-muted: #7C8494;
+  --hairline: rgba(237, 238, 242, 0.12);
+  --shadow-md: 0 0 40px rgba(91, 110, 243, 0.35);
+  --shadow-lg: 0 0 70px rgba(91, 110, 243, 0.4);
+  --shadow-lime: 0 0 40px rgba(214, 238, 60, 0.28);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root[data-theme="dark"] {
+  --bg: #0A0C10;
+  --surface: #1B2430;
+  --surface-hover: #232F3F;
+  --signal-blue: #5B6EF3;
+  --signal-blue-hover: #7A8BFF;
+  --signal-lime: #D6EE3C;
+  --text: #EDEEF2;
+  --text-secondary: #B8BEC9;
+  --text-muted: #7C8494;
+  --hairline: rgba(237, 238, 242, 0.12);
+  --shadow-md: 0 0 40px rgba(91, 110, 243, 0.35);
+  --shadow-lg: 0 0 70px rgba(91, 110, 243, 0.4);
+  --shadow-lime: 0 0 40px rgba(214, 238, 60, 0.28);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root[data-theme="light"] {
+  --bg: #F5F6F8;
+  --surface: #FFFFFF;
+  --surface-hover: #FBFBFD;
+  --signal-blue: #4459E0;
+  --signal-blue-hover: #5B6EF3;
+  --signal-lime: #B8CE1E;
+  --text: #1B2430;
+  --text-secondary: #4A5568;
+  --text-muted: #8A93A3;
+  --hairline: rgba(27, 36, 48, 0.10);
+  --shadow-md: 0 0 30px rgba(68, 89, 224, 0.18);
+  --shadow-lg: 0 0 50px rgba(68, 89, 224, 0.22);
+  --shadow-lime: 0 0 30px rgba(184, 206, 30, 0.20);
+}
+
+@theme {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-blue: var(--signal-blue);
+  --color-blue-hover: var(--signal-blue-hover);
+  --color-lime: var(--signal-lime);
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-hairline: var(--hairline);
+  
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-full: 999px;
+
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-lime: var(--shadow-lime);
+
+  --font-fredoka: var(--font-fredoka);
+}
+
+/* Base resets and defaults */
+html {
+  scroll-behavior: auto; /* lenis will handle smooth scroll */
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-fredoka), sans-serif;
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-fredoka), sans-serif;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--signal-blue);
+  color: #FFFFFF;
+}
+
+/* Custom interactive styling rules */
+a, button, input {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Strict keyboard focus ring compliance */
+*:focus-visible {
+  outline: 2px solid var(--signal-blue) !important;
+  outline-offset: 3px !important;
+}
+
+/* Hide default browser focus outline when focus-visible is active */
+*:focus {
+  outline: none;
+}
+
+/* Utility reveals for scroll-driven animations */
+.reveal-el {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* Layout utilities */
+.glow-blue-radial {
+  background: radial-gradient(circle, rgba(91, 110, 243, 0.15) 0%, rgba(10, 12, 16, 0) 70%);
+}
+
+.glow-lime-radial {
+  background: radial-gradient(circle, rgba(214, 238, 60, 0.15) 0%, rgba(10, 12, 16, 0) 70%);
+}
+
+[data-theme="light"] .glow-blue-radial {
+  background: radial-gradient(circle, rgba(68, 89, 224, 0.08) 0%, rgba(245, 246, 248, 0) 70%);
+}
+
+[data-theme="light"] .glow-lime-radial {
+  background: radial-gradient(circle, rgba(184, 206, 30, 0.08) 0%, rgba(245, 246, 248, 0) 70%);
+}
+
+/* Nav backdrop-blur transitions */
+.nav-header {
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
+  backdrop-filter: blur(0px);
+  transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              backdrop-filter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-header.nav-active {
+  background-color: rgba(27, 36, 48, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(237, 238, 242, 0.12);
+}
+
+[data-theme="light"] .nav-header.nav-active {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(27, 36, 48, 0.1);
 }

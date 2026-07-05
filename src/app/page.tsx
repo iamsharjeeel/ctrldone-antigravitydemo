@@ -1,103 +1,92 @@
-import Image from "next/image";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import Nav from "@/components/Nav";
+import Hero from "@/components/Hero";
+import WhyCtrldone from "@/components/WhyCtrldone";
+import Services from "@/components/Services";
+import Process from "@/components/Process";
+import Otomate from "@/components/Otomate";
+import Outcomes from "@/components/Outcomes";
+import StartProject from "@/components/StartProject";
+import Footer from "@/components/Footer";
+import IntakeModal from "@/components/IntakeModal";
+import { gsap } from "@/lib/gsap";
+
+// Lazy mount the React Three Fiber Canvas to optimize performance
+const ControlRing = dynamic(() => import("@/components/ControlRing"), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 w-full h-full pointer-events-none z-0 flex items-center justify-center bg-bg">
+      {/* Static placeholder circle while hydrating */}
+      <div className="absolute w-[280px] h-[280px] rounded-full border border-hairline opacity-10 animate-pulse" />
+    </div>
+  ),
+});
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+  useEffect(() => {
+    // Check if the user prefers reduced motion
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      // If prefers-reduced-motion is true, instantly set all reveal elements to full opacity
+      gsap.set(".reveal-el", { opacity: 1, y: 0 });
+      return;
+    }
+
+    // GSAP ScrollTrigger reveals: autoAlpha 0 -> 1 + y: 28px -> 0, duration 0.8s, ease: power4.out
+    const revealElements = gsap.utils.toArray<HTMLElement>(".reveal-el");
+
+    revealElements.forEach((el) => {
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: 28 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power4.out", // GSAP's built-in power4.out matches cubic-bezier(0.16, 1, 0.3, 1) closely
+          scrollTrigger: {
+            trigger: el,
+            start: "top 82%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
+    });
+  }, []);
+
+  const openIntake = () => setIsModalOpen(true);
+  const closeIntake = () => setIsModalOpen(false);
+
+  return (
+    <div className="relative min-h-screen w-full bg-bg text-text overflow-hidden selection:bg-blue selection:text-bg">
+      {/* Navigation */}
+      <Nav onOpenIntake={openIntake} />
+
+      {/* 3D Particle Canvas backdrop */}
+      <ControlRing />
+
+      {/* Sections */}
+      <main className="relative z-10 w-full">
+        <Hero onOpenIntake={openIntake} />
+        <WhyCtrldone />
+        <Services onOpenIntake={openIntake} />
+        <Process />
+        <Otomate />
+        <Outcomes />
+        <StartProject onOpenIntake={openIntake} />
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      {/* Footer */}
+      <Footer />
+
+      {/* Intake Modal Popup */}
+      <IntakeModal isOpen={isModalOpen} onClose={closeIntake} />
     </div>
   );
 }
