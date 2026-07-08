@@ -26,7 +26,15 @@ function ParticleField({
   // Listen for mousemove to implement mouse parallax
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      const isMobile = window.innerWidth < 1024; // lg breakpoint is 1024px
+      if (isMobile) {
+        // Full width canvas on mobile
+        mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      } else {
+        // Right half canvas on desktop (lg:w-1/2)
+        const relativeX = e.clientX - (window.innerWidth / 2);
+        mouseRef.current.x = (relativeX / (window.innerWidth / 2)) * 2 - 1;
+      }
       mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
     };
     window.addEventListener("mousemove", handleMouseMove);
@@ -195,11 +203,11 @@ function ParticleField({
 
     // Group-level transform (scaling, rotation, parallax)
     if (groupRef.current) {
-      const heroX = width < 6 ? 0 : width / 4;
+      const heroX = 0; // Centered in the right-half canvas
       const heroY = 0;
 
-      // Maintain large hero scale
-      const scaleMultiplier = width < 6 ? 0.8 : 1.0;
+      // Make it half in size
+      const scaleMultiplier = width < 6 ? 0.4 : 0.5;
       groupRef.current.scale.setScalar(scaleMultiplier);
 
       const targetParallaxX = mouseRef.current.x * 0.25;
@@ -226,7 +234,7 @@ function ParticleField({
           </bufferGeometry>
           <pointsMaterial
             ref={materialRef}
-            size={particleCount === 1000 ? 0.13 : 0.09}
+            size={particleCount === 1000 ? 0.08 : 0.05}
             map={faviconTexture}
             vertexColors={true}
             transparent
@@ -266,7 +274,7 @@ export default function ControlRing() {
   }, []);
 
   return (
-    <div className="fixed inset-0 w-full h-full pointer-events-none z-20">
+    <div className="absolute inset-0 w-full h-full pointer-events-none">
       <Canvas
         camera={{ position: [0, 0, 6], fov: 60 }}
         gl={{ antialias: true, alpha: true }}

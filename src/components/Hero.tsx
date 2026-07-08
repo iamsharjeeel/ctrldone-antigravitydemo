@@ -1,7 +1,19 @@
 "use client";
 
 import React, { useEffect } from "react";
+import dynamic from "next/dynamic";
 import { gsap } from "@/lib/gsap";
+
+// Lazy mount the React Three Fiber Canvas to optimize performance
+const ControlRing = dynamic(() => import("@/components/ControlRing"), {
+  ssr: false,
+  loading: () => (
+    <div className="absolute inset-0 flex items-center justify-center bg-transparent pointer-events-none">
+      {/* Static placeholder circle while hydrating */}
+      <div className="w-[140px] h-[140px] rounded-full border border-hairline opacity-10 animate-pulse" />
+    </div>
+  ),
+});
 
 interface HeroProps {
   onOpenIntake: () => void;
@@ -35,6 +47,11 @@ export default function Hero({ onOpenIntake }: HeroProps) {
     >
       {/* Subtle blue glow behind content */}
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] glow-blue-radial pointer-events-none opacity-60" />
+
+      {/* 3D Particle Canvas backdrop confined to the Hero section */}
+      <div className="absolute top-0 right-0 w-full lg:w-1/2 h-full pointer-events-none z-0">
+        <ControlRing />
+      </div>
 
       <div className="relative z-10 max-w-xl md:max-w-2xl lg:max-w-[45vw] text-left reveal-el">
         <span className="inline-block text-xs font-semibold tracking-[0.16em] text-blue uppercase mb-4">
