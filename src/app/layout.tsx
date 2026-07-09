@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
-import { Fredoka } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
 import "./globals.css";
 
-const fredoka = Fredoka({
+const geistSans = Geist({
   subsets: ["latin"],
-  weight: ["300", "500", "600", "700"],
-  variable: "--font-fredoka",
+  variable: "--font-geist-sans",
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
@@ -23,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={fredoka.variable} data-theme="dark">
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} data-theme="dark">
       <head>
         <script
           dangerouslySetInnerHTML={{

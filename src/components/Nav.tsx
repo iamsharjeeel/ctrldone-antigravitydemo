@@ -60,16 +60,16 @@ export default function Nav({ onOpenIntake }: NavProps) {
 
         {/* Desktop Links (Center-Right) */}
         <nav className="hidden md:flex items-center gap-8 ml-auto mr-8">
-          <a href="#why" className="text-xs font-semibold tracking-[0.16em] uppercase text-text-secondary hover:text-text">
+          <a href="#why" className="text-[13px] font-mono tracking-[0.08em] uppercase text-text-secondary hover:text-text">
             Why
           </a>
-          <a href="#services" className="text-xs font-semibold tracking-[0.16em] uppercase text-text-secondary hover:text-text">
+          <a href="#services" className="text-[13px] font-mono tracking-[0.08em] uppercase text-text-secondary hover:text-text">
             What We Run
           </a>
-          <a href="#process" className="text-xs font-semibold tracking-[0.16em] uppercase text-text-secondary hover:text-text">
+          <a href="#process" className="text-[13px] font-mono tracking-[0.08em] uppercase text-text-secondary hover:text-text">
             How We Work
           </a>
-          <a href="#otomate" className="text-xs font-semibold tracking-[0.16em] uppercase text-text-secondary hover:text-text">
+          <a href="#otomate" className="text-[13px] font-mono tracking-[0.08em] uppercase text-text-secondary hover:text-text">
             Otomate
           </a>
         </nav>
@@ -79,7 +79,7 @@ export default function Nav({ onOpenIntake }: NavProps) {
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            className="p-2.5 rounded-full border border-hairline hover:bg-surface text-text-secondary hover:text-text"
+            className="p-2.5 rounded-md border border-hairline hover:bg-surface-hover text-text-secondary hover:text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue"
             aria-label="Toggle light and dark mode"
           >
             {theme === "dark" ? (
@@ -92,7 +92,7 @@ export default function Nav({ onOpenIntake }: NavProps) {
           {/* CTA Button */}
           <button
             onClick={onOpenIntake}
-            className="hidden sm:inline-flex items-center justify-center text-xs font-semibold uppercase tracking-wider bg-blue text-bg px-4 py-2.5 rounded-full hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+            className="hidden sm:inline-flex items-center justify-center text-xs font-mono uppercase tracking-wider bg-blue text-bg px-4 py-2.5 rounded-md hover:bg-blue-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue cursor-pointer"
           >
             Start a project
           </button>
@@ -100,7 +100,7 @@ export default function Nav({ onOpenIntake }: NavProps) {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-full border border-hairline hover:bg-surface text-text-secondary hover:text-text"
+            className="md:hidden p-2 rounded-md border border-hairline hover:bg-surface-hover text-text-secondary hover:text-text"
             aria-label="Toggle mobile menu"
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -110,7 +110,7 @@ export default function Nav({ onOpenIntake }: NavProps) {
 
       {/* Full-screen Overlay Mobile Menu */}
       <div
-        className={`fixed inset-0 z-40 bg-bg/95 backdrop-blur-lg flex flex-col items-center justify-center transition-all duration-500 md:hidden ${
+        className={`fixed inset-0 z-40 bg-surface/98 border-b border-hairline flex flex-col items-center justify-center transition-all duration-500 md:hidden ${
           mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >
@@ -118,28 +118,28 @@ export default function Nav({ onOpenIntake }: NavProps) {
           <a
             href="#why"
             onClick={closeMobileMenu}
-            className="text-lg font-semibold tracking-[0.16em] uppercase text-text-secondary hover:text-text"
+            className="text-lg font-mono tracking-[0.08em] uppercase text-text-secondary hover:text-text"
           >
             Why
           </a>
           <a
             href="#services"
             onClick={closeMobileMenu}
-            className="text-lg font-semibold tracking-[0.16em] uppercase text-text-secondary hover:text-text"
+            className="text-lg font-mono tracking-[0.08em] uppercase text-text-secondary hover:text-text"
           >
             What We Run
           </a>
           <a
             href="#process"
             onClick={closeMobileMenu}
-            className="text-lg font-semibold tracking-[0.16em] uppercase text-text-secondary hover:text-text"
+            className="text-lg font-mono tracking-[0.08em] uppercase text-text-secondary hover:text-text"
           >
             How We Work
           </a>
           <a
             href="#otomate"
             onClick={closeMobileMenu}
-            className="text-lg font-semibold tracking-[0.16em] uppercase text-text-secondary hover:text-text"
+            className="text-lg font-mono tracking-[0.08em] uppercase text-text-secondary hover:text-text"
           >
             Otomate
           </a>
@@ -150,7 +150,7 @@ export default function Nav({ onOpenIntake }: NavProps) {
               closeMobileMenu();
               onOpenIntake();
             }}
-            className="sm:hidden inline-flex items-center justify-center text-xs font-semibold uppercase tracking-wider bg-blue text-bg px-6 py-3 rounded-full mt-4 cursor-pointer"
+            className="sm:hidden inline-flex items-center justify-center text-xs font-mono uppercase tracking-wider bg-blue text-bg px-6 py-3 rounded-md mt-4 cursor-pointer"
           >
             Start a project
           </button>

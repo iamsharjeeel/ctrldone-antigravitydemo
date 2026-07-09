@@ -63,7 +63,7 @@ export default function Home() {
       <main className="relative z-10 w-full">
         <Hero onOpenIntake={openIntake} />
         <WhyCtrldone />
-        <Services onOpenIntake={openIntake} />
+        <Services />
         <Process />
         <Otomate />
         <Outcomes />

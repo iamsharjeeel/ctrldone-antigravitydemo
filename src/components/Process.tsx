@@ -27,35 +27,38 @@ const steps = [
 
 export default function Process() {
   return (
-    <section id="process" className="px-6 md:px-12 lg:px-24 py-24 md:py-32 relative">
-      <div className="max-w-4xl mx-auto">
-        <div className="reveal-el mb-16">
-          <span className="inline-block text-xs font-semibold tracking-[0.16em] text-blue uppercase mb-4">
-            How we work
+    <section id="process" className="px-6 md:px-12 lg:px-24 py-24 md:py-32 relative max-w-6xl mx-auto">
+      <div className="max-w-4xl">
+        <div className="reveal-el mb-20 text-left">
+          <span className="inline-block text-xs font-mono tracking-[0.16em] text-blue uppercase mb-4">
+            {"// how we work"}
           </span>
-          <h2 className="text-[clamp(2rem,4vw,3.25rem)] font-light leading-[1.1] text-text mb-6">
+          <h2 className="text-[clamp(2rem,3.6vw,3rem)] font-light leading-[1.1] text-text mb-6 tracking-[-0.02em]">
             Four <span className="font-bold">steps</span>. No <span className="font-bold">slide-deck theater</span>.
           </h2>
         </div>
 
         <div className="relative">
-          {/* Vertical hairline running through center of the numerals */}
-          <div className="absolute left-[20px] md:left-[24px] top-6 bottom-6 w-[1px] bg-hairline" />
+          {/* Vertical dashed trace line */}
+          <div className="absolute left-[24px] md:left-[28px] top-6 bottom-6 w-0 border-l border-dashed border-hairline select-none pointer-events-none" />
 
-          <div className="space-y-16">
+          <div className="space-y-20">
             {steps.map((step, index) => (
               <div key={index} className="relative flex gap-6 md:gap-10 items-start reveal-el">
-                {/* Numeric Indicator */}
-                <div className="relative z-10 flex items-center justify-center w-[40px] h-[40px] md:w-[48px] md:h-[48px] rounded-full bg-bg border border-hairline text-blue font-bold text-lg md:text-xl shrink-0">
+                {/* Square build log indicator */}
+                <div className="relative z-10 flex items-center justify-center w-[48px] h-[48px] md:w-[56px] md:h-[56px] rounded-sm bg-surface border border-hairline text-blue font-mono text-[16px] md:text-lg shrink-0 select-none">
                   {step.num}
                 </div>
 
                 {/* Content Details */}
-                <div className="flex-1 pt-1 md:pt-2">
-                  <h3 className="text-base font-bold tracking-[0.08em] text-text mb-2">
+                <div className="flex-1 pt-1.5">
+                  <span className="block font-mono text-[11px] uppercase tracking-wider text-text-muted mb-1">
+                    STEP_{step.num}
+                  </span>
+                  <h3 className="text-base md:text-lg font-bold tracking-[0.08em] text-text mb-3">
                     {step.title}
                   </h3>
-                  <p className="text-[1.0625rem] font-light leading-relaxed text-text-secondary max-w-2xl">
+                  <p className="text-[16px] md:text-[18px] font-normal leading-relaxed text-text-secondary max-w-2xl">
                     {step.desc}
                   </p>
                 </div>
