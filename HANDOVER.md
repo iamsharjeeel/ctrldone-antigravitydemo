@@ -2,7 +2,7 @@
 
 ## One-line status
 
-Branch `feature/roadmap-core-batch`: ROADMAP #14 SMS · #16 API/webhooks · #17 visibility RLS · #20 billing · #13 booking · #15 forms (plus prior). Apply migrations through `20260711073300_subscriptions.sql`.
+Branch `feature/roadmap-core-batch`: all 20 ROADMAP features implemented (commits through `e41aa97`). Apply migrations through `20260711073300_subscriptions.sql`. Not merged to `main` yet.
 
 ## Manual steps (do now if Google needed)
 

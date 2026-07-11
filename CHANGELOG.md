@@ -1,5 +1,6 @@
 # Changelog
 
+- 2026-07-11 — Docs: README/HANDOVER mark all 20 ROADMAP features complete on `feature/roadmap-core-batch`
 - 2026-07-11 — ROADMAP #14/#16/#17/#20: SMS (Twilio), public API+webhooks, owner-scoped RLS, billing/subscriptions
 - 2026-07-11 — ROADMAP #13/#15: booking pages + public `/book/[slug]`; forms builder + `/f/[id]` + `embed.js` + `submit_form`
 - 2026-07-11 — ROADMAP #3/#8: Gmail inbox-poll cron (reply + bounce), bounce webhook, suppression check verified, `email_replied` activity
