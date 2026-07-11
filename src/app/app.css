@@ -247,6 +247,158 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-app);
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
+}
+
+[data-shell="app"] .app-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+[data-shell="app"] .empty-row {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+[data-shell="app"] .text-meta {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+[data-shell="app"] .field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+[data-shell="app"] .empty-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-secondary);
+}
+
+[data-shell="app"] .empty-inline-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+[data-shell="app"] .pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+[data-shell="app"] .pagination-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+[data-shell="app"] .pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+[data-shell="app"] .segmented {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
+}
+
+[data-shell="app"] .segmented-btn {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+[data-shell="app"] .segmented-btn[data-active="true"] {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.08);
+}
+
+[data-shell="app"] .task-title--done {
+  color: var(--text-muted) !important;
+  text-decoration: line-through;
+}
+
+[data-shell="app"] .task-due--overdue {
+  color: var(--signal-red);
+  font-weight: 700;
+}
+
+[data-shell="app"] .command-hint {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+[data-shell="app"] .command-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 10px;
+  font-weight: 600;
+  margin-right: 2px;
+}
+
+[data-shell="app"] .skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-hover) 37%, var(--surface-2) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shine 1.4s ease infinite;
+}
+
+@keyframes skeleton-shine {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
 }
 
 [data-shell="app"] .app-btn {
@@ -500,10 +652,45 @@
   padding: 16px;
   margin-bottom: 10px;
   cursor: grab;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+[data-shell="app"] .deal-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.08);
 }
 
 [data-shell="app"] .deal-card:active {
   cursor: grabbing;
+}
+
+[data-shell="app"] .deal-card--won {
+  border-left: 3px solid var(--forest);
+}
+
+[data-shell="app"] .kanban-col-meta--won {
+  color: var(--forest);
+}
+
+[data-shell="app"] .kanban-col {
+  border-radius: var(--radius-app);
+  transition: background-color 0.15s ease, outline-color 0.15s ease;
+}
+
+[data-shell="app"] .kanban-col.drag-over {
+  background: color-mix(in srgb, var(--signal-blue) 6%, transparent);
+  outline: 2px dashed color-mix(in srgb, var(--signal-blue) 45%, transparent);
+  outline-offset: -4px;
+}
+
+[data-shell="app"] .kanban-empty {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-app);
+  padding: 20px 12px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 [data-shell="app"] .deal-card-title {

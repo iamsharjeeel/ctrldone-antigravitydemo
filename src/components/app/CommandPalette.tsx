@@ -1,13 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+
+type Item =
+  | { type: "action"; label: string; go: string }
+  | { type: "contact"; label: string; sub: string | null; go: string };
 
 export default function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<{ id: string; name: string; email: string | null }[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -39,6 +44,30 @@ export default function CommandPalette() {
     run();
   }, [q, open]);
 
+  const items: Item[] = useMemo(
+    () => [
+      { type: "action", label: "Create task → Activity", go: "/app/activity" },
+      { type: "action", label: "Enroll in campaign → Campaigns", go: "/app/campaigns" },
+      ...hits.map((h): Item => ({
+        type: "contact",
+        label: h.name,
+        sub: h.email,
+        go: `/app/contacts/${h.id}`,
+      })),
+    ],
+    [hits]
+  );
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [q, open]);
+
+  const go = (path: string) => {
+    router.push(path);
+    setOpen(false);
+    setQ("");
+  };
+
   if (!open) return null;
 
   return (
@@ -58,50 +87,57 @@ export default function CommandPalette() {
           placeholder="Jump to contact, or type a command…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              setActiveIndex((i) => Math.min(items.length - 1, i + 1));
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              setActiveIndex((i) => Math.max(0, i - 1));
+            } else if (e.key === "Enter") {
+              const item = items[activeIndex];
+              if (item) go(item.go);
+            }
+          }}
         />
         <ul>
-          <li>
-            <button
-              type="button"
-              className="w-full text-left px-4 py-2 text-sm hover:bg-[var(--surface-hover)]"
-              onClick={() => {
-                router.push("/app/activity");
-                setOpen(false);
-              }}
-            >
-              Create task → Activity
-            </button>
-          </li>
-          <li>
-            <button
-              type="button"
-              className="w-full text-left px-4 py-2 text-sm hover:bg-[var(--surface-hover)]"
-              onClick={() => {
-                router.push("/app/campaigns");
-                setOpen(false);
-              }}
-            >
-              Enroll in campaign → Campaigns
-            </button>
-          </li>
-          {hits.map((h) => (
-            <li key={h.id}>
+          {items.map((item, i) => (
+            <li key={`${item.type}-${item.go}-${i}`}>
               <button
                 type="button"
                 className="w-full text-left px-4 py-2 text-sm hover:bg-[var(--surface-hover)]"
-                onClick={() => {
-                  router.push(`/app/contacts/${h.id}`);
-                  setOpen(false);
-                }}
+                style={i === activeIndex ? { background: "var(--surface-hover)" } : undefined}
+                onMouseEnter={() => setActiveIndex(i)}
+                onClick={() => go(item.go)}
               >
-                {h.name}{" "}
-                <span className="font-data text-xs" style={{ color: "var(--text-muted)" }}>
-                  {h.email}
-                </span>
+                {item.label}
+                {item.type === "contact" && item.sub && (
+                  <span className="font-data text-xs" style={{ color: "var(--text-muted)" }}>
+                    {" "}
+                    {item.sub}
+                  </span>
+                )}
               </button>
             </li>
           ))}
+          {q.trim() && !hits.length && (
+            <li className="px-4 py-6 text-sm text-center" style={{ color: "var(--text-muted)" }}>
+              No contacts found for &ldquo;{q}&rdquo;
+            </li>
+          )}
         </ul>
+        <div className="command-hint">
+          <span>
+            <span className="command-kbd">↑</span>
+            <span className="command-kbd">↓</span> Navigate
+          </span>
+          <span>
+            <span className="command-kbd">↵</span> Select
+          </span>
+          <span>
+            <span className="command-kbd">Esc</span> Close
+          </span>
+        </div>
       </div>
     </div>
   );

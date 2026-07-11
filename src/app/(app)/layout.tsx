@@ -26,7 +26,15 @@ export default async function CrmLayout({
   const { error: bootstrapError } = await ensureOrg();
 
   return (
-    <div className={poppins.variable} style={{ fontFamily: "var(--font-sans)" }}>
+    <div
+      className={poppins.variable}
+      style={
+        {
+          "--font-sans": "var(--font-poppins), ui-sans-serif, system-ui, sans-serif",
+          fontFamily: "var(--font-sans)",
+        } as React.CSSProperties
+      }
+    >
       <script
         dangerouslySetInnerHTML={{
           __html: `document.documentElement.setAttribute('data-shell','app');document.documentElement.setAttribute('data-theme','light');`,

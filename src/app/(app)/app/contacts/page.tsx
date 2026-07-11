@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Contact } from "@/lib/types";
 import ErrorBanner from "@/components/app/ErrorBanner";
 import ContactInspector from "@/components/app/ContactInspector";
-import { ChevronLeft, ChevronRight, Filter, Plus, Upload } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, Plus, Upload, Users } from "lucide-react";
 import Papa from "papaparse";
 
 const PAGE_SIZE = 10;
@@ -665,30 +665,36 @@ export default function ContactsPage() {
                     {c.stage_name || "—"}
                   </span>
                 </td>
-                <td style={{ color: "var(--text-secondary)" }}>
+                <td className="text-meta">
                   {formatActivity(c.updated_at)}
                 </td>
               </tr>
             ))}
             {!filtered.length && (
               <tr>
-                <td colSpan={6} style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
-                  No contacts yet.{" "}
-                  <button
-                    type="button"
-                    className="underline"
-                    onClick={() => setShowCreate(true)}
-                  >
-                    Add Contact
-                  </button>
+                <td colSpan={6}>
+                  <div className="empty-inline">
+                    <div className="empty-inline-icon">
+                      <Users size={20} strokeWidth={1.5} />
+                    </div>
+                    <p className="empty-row" style={{ marginBottom: 4 }}>No contacts yet.</p>
+                    <button
+                      type="button"
+                      className="app-btn app-btn-primary"
+                      style={{ marginTop: 8 }}
+                      onClick={() => setShowCreate(true)}
+                    >
+                      <Plus size={14} /> Add Contact
+                    </button>
+                  </div>
                 </td>
               </tr>
             )}
           </tbody>
         </table>
         <div
-          className="flex items-center justify-between px-4 h-12 border-t text-sm"
-          style={{ borderColor: "var(--border)", color: "var(--text-secondary)", fontWeight: 500 }}
+          className="flex items-center justify-between px-4 h-12 border-t text-sm text-meta"
+          style={{ borderColor: "var(--border)" }}
         >
           <span>
             Showing {filtered.length ? page * PAGE_SIZE + 1 : 0}-
@@ -697,7 +703,7 @@ export default function ContactsPage() {
           <div className="flex gap-1">
             <button
               type="button"
-              className="top-nav-icon"
+              className="pagination-btn"
               disabled={page === 0}
               onClick={() => setPage((p) => Math.max(0, p - 1))}
             >
@@ -705,7 +711,7 @@ export default function ContactsPage() {
             </button>
             <button
               type="button"
-              className="top-nav-icon"
+              className="pagination-btn"
               disabled={page >= pageCount - 1}
               onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
             >
@@ -715,7 +721,7 @@ export default function ContactsPage() {
         </div>
       </div>
 
-      <p className="text-xs" style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
+      <p className="text-xs text-meta">
         Tip: click a row to inspect, or open the name for full detail.{" "}
         <Link href="/app/settings/email" className="underline">
           Connect Gmail

@@ -143,12 +143,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="app-card overflow-hidden">
-          <div
-            className="px-4 h-12 flex items-center border-b app-section-title"
-            style={{ borderColor: "var(--border)", fontSize: 15 }}
-          >
-            Recent deals
-          </div>
+          <div className="app-card-header">Recent deals</div>
           <table className="app-table">
             <thead>
               <tr>
@@ -179,7 +174,7 @@ export default async function DashboardPage() {
               ))}
               {!deals?.length && (
                 <tr>
-                  <td colSpan={3} style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
+                  <td colSpan={3} className="empty-row">
                     No deals yet
                   </td>
                 </tr>
@@ -189,12 +184,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="app-card overflow-hidden">
-          <div
-            className="px-4 h-12 flex items-center border-b app-section-title"
-            style={{ borderColor: "var(--border)", fontSize: 15 }}
-          >
-            Due tasks
-          </div>
+          <div className="app-card-header">Due tasks</div>
           <table className="app-table">
             <thead>
               <tr>
@@ -215,7 +205,7 @@ export default async function DashboardPage() {
               ))}
               {!tasks?.length && (
                 <tr>
-                  <td colSpan={2} style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
+                  <td colSpan={2} className="empty-row">
                     No open tasks
                   </td>
                 </tr>
