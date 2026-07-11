@@ -26,7 +26,7 @@ export default async function CrmLayout({
   const { error: bootstrapError } = await ensureOrg();
 
   return (
-    <div className={poppins.variable}>
+    <div className={poppins.variable} style={{ fontFamily: "var(--font-sans)" }}>
       <script
         dangerouslySetInnerHTML={{
           __html: `document.documentElement.setAttribute('data-shell','app');document.documentElement.setAttribute('data-theme','light');`,

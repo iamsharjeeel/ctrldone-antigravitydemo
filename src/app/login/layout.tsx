@@ -15,7 +15,7 @@ export default function LoginLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className={poppins.variable}>
+    <div className={poppins.variable} style={{ fontFamily: "var(--font-sans)" }}>
       <script
         dangerouslySetInnerHTML={{
           __html: `document.documentElement.setAttribute('data-shell','login');document.documentElement.setAttribute('data-theme','light');`,
