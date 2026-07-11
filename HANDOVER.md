@@ -2,7 +2,7 @@
 
 ## One-line status
 
-Roadmap branches: `#10` global search · `#5` custom fields · `#1` multi-pipeline (current: `feature/1-multi-pipeline`). Next suggested: `#6` saved segments.
+Branch `feature/roadmap-core-batch-b`: ROADMAP #2 campaign analytics · #4 contact merge · #18 automations · #19 activity comments (on top of batch A #7/#9/#11/#12).
 
 ## Manual steps (do now if Google needed)
 
@@ -11,6 +11,7 @@ Roadmap branches: `#10` global search · `#5` custom fields · `#1` multi-pipeli
    - `http://127.0.0.1:54321/auth/v1/callback` (Supabase Auth login)
    - `http://localhost:3000/api/oauth/google/callback` (Gmail send connect)
 3. Restart local Supabase after setting Google env: `npx supabase stop` → `npx supabase start`.
+4. Apply migrations `20260711070400`–`20260711070600` (merge, automations, activity_comments). Mentions need `#9` notifications migration (`20260711070100`) if not applied.
 
 ## Local stack
 
@@ -71,18 +72,20 @@ Source session: App UI polish + 10 features. Keep these as the visual north star
 
 ## What changed (this pass)
 
+- **ROADMAP #2/#4/#18/#19 (batch B):** campaign builder stats; `merge_contacts` + bulk Merge + duplicate badge; `automation_rules` + Settings → Automations + `moveDeal` hook; `activity_comments` + Reply/@mentions
+- **ROADMAP #7/#9/#11/#12 (batch):** recurring tasks + cron; notifications table/prefs/digest; reports page + RPCs; scoring_rules + settings + inspector history
 - **ROADMAP #1:** Pipeline switcher via `?pipeline=` + `.segmented`; Settings → Pipelines create/default/delete (friendly FK error)
 - **ROADMAP #5:** Shared `CustomFieldsEditor` (text/number/date/boolean/select) in ContactInspector + contact detail; settings/fields validates select options
 - **ROADMAP #10:** `CommandPalette` searches contacts, deals, and tasks (org-scoped), grouped under Actions / Contacts / Deals / Tasks headers; deal → `/app/deals/[id]`, task → `/app/tasks`
 - **Brand:** `Logo` in AppShell + login; lime/blue badge tokens restored under app/login shells
 - **Type:** Poppins (400–700); clearer hierarchy; no Playfair/Inter in CRM
 - **Shape:** cards 16px; buttons/inputs/search pills
-- **Nav:** Dashboard · Contacts · Pipeline · **Tasks** · Activity; settings subnav; notifications dropdown
+- **Nav:** Dashboard · Contacts · Pipeline · **Tasks** · Activity · **Reports**; settings include Scoring + Notifications
 - **Pipeline:** richer deal cards (contact, close, days in stage); filters; contact picker on create
 - **Contacts:** real filters, CSV as Import, ContactInspector, bulk enroll/tag/export
 - **Contact detail:** score, deals, custom fields, in-app email compose + templates
-- **Settings:** Templates, Fields, Pipelines, Suppression, Audit pages
-- **Activity:** timeline + “Open Tasks” link (no duplicate task create sidebar)
+- **Settings:** Templates, Fields, Pipelines, Automations, Scoring, Notifications, Suppression, Audit pages
+- **Activity:** timeline + replies/comments + “Open Tasks” link (no duplicate task create sidebar)
 - **Docs:** `DESIGN_SYSTEM.md`, `ROADMAP.md`, `.cursor/rules/*`
 
 ## Hard rules (do not regress)

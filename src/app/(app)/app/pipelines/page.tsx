@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import ErrorBanner from "@/components/app/ErrorBanner";
+import { createNotification } from "@/lib/notifications";
+import { evaluateAutomations } from "@/lib/automations";
 import { Filter, Plus, X } from "lucide-react";
 
 type Stage = { id: string; name: string; position: number };
@@ -17,6 +19,7 @@ type Deal = {
   currency: string;
   stage_id: string;
   contact_id: string | null;
+  owner_id: string | null;
   expected_close: string | null;
   stage_entered_at: string | null;
   contacts?: { name?: string; company?: string | null } | null;
@@ -116,7 +119,7 @@ export default function PipelinesPage() {
     const { data: d, error: dealErr } = await supabase
       .from("deals")
       .select(
-        "id, title, value, currency, stage_id, contact_id, expected_close, stage_entered_at, contacts(name, company)"
+        "id, title, value, currency, stage_id, contact_id, owner_id, expected_close, stage_entered_at, contacts(name, company)"
       )
       .eq("pipeline_id", selected.id);
     if (dealErr) {
@@ -188,6 +191,26 @@ export default function PipelinesPage() {
       entity_id: dealId,
       before,
       after: { stage_id: stageId },
+    });
+    const stageName = stages.find((s) => s.id === stageId)?.name || "a new stage";
+    if (deal.owner_id) {
+      await createNotification(supabase, {
+        orgId,
+        userId: deal.owner_id,
+        type: "deal_stage",
+        title: `${deal.title} → ${stageName}`,
+        body: "Deal stage changed",
+        link: `/app/pipelines?pipeline=${pipelineId || ""}`,
+      });
+    }
+    await evaluateAutomations(supabase, {
+      orgId,
+      triggerType: "deal_stage_changed",
+      stageName,
+      stageId,
+      dealId: dealId,
+      contactId: deal.contact_id,
+      ownerId: deal.owner_id,
     });
     load();
   };

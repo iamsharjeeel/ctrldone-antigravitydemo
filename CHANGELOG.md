@@ -1,5 +1,7 @@
 # Changelog
 
+- 2026-07-11 — ROADMAP #2/#4/#18/#19: campaign stats, contact merge RPC+UI, automation rules, activity comments/@mentions
+- 2026-07-11 — ROADMAP #7/#9/#11/#12: recurring tasks, notifications+digest, reports dashboard, scoring rules
 - 2026-07-11 — ROADMAP #1: multi-pipeline switcher (?pipeline=) + Settings → Pipelines create/default/delete
 - 2026-07-11 — ROADMAP #5: CustomFieldsEditor (all schema field types) in inspector + contact detail; select option validation
 - 2026-07-11 — ROADMAP #10: ⌘K command palette searches contacts, deals, and tasks (grouped results)

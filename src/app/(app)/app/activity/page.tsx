@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import ErrorBanner from "@/components/app/ErrorBanner";
+import ActivityComments from "@/components/app/ActivityComments";
 import { ArrowRight, Clock3 } from "lucide-react";
 
 type Activity = {
@@ -20,6 +21,7 @@ export default function ActivityPage() {
   const [items, setItems] = useState<Activity[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [openTaskCount, setOpenTaskCount] = useState(0);
+  const [orgId, setOrgId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const supabase = createClient();
@@ -37,6 +39,7 @@ export default function ActivityPage() {
       setError("No organization found.");
       return;
     }
+    setOrgId(mem.org_id);
 
     const { data, error: loadErr } = await supabase
       .from("activities")
@@ -98,6 +101,7 @@ export default function ActivityPage() {
                   </span>
                 </div>
                 {a.body && <p className="mt-2 text-sm text-meta">{a.body}</p>}
+                {orgId && <ActivityComments activityId={a.id} orgId={orgId} />}
               </div>
             ))}
             {!items.length && (

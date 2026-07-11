@@ -67,6 +67,9 @@ export default function ContactsPage() {
   const [campaigns, setCampaigns] = useState<{ id: string; name: string; org_id: string }[]>([]);
   const [bulkCampaignId, setBulkCampaignId] = useState("");
   const [bulkTag, setBulkTag] = useState("");
+  const [mergeOpen, setMergeOpen] = useState(false);
+  const [mergeKeepId, setMergeKeepId] = useState("");
+  const [merging, setMerging] = useState(false);
 
   const load = useCallback(async () => {
     const supabase = createClient();
@@ -177,6 +180,25 @@ export default function ContactsPage() {
   const pageRows = useMemo(
     () => filtered.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE),
     [filtered, page]
+  );
+
+  const duplicateEmails = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const c of contacts) {
+      const email = (c.email || "").trim().toLowerCase();
+      if (!email) continue;
+      counts.set(email, (counts.get(email) || 0) + 1);
+    }
+    const dups = new Set<string>();
+    for (const [email, n] of counts) {
+      if (n > 1) dups.add(email);
+    }
+    return dups;
+  }, [contacts]);
+
+  const selectedContacts = useMemo(
+    () => contacts.filter((c) => selected.has(c.id)),
+    [contacts, selected]
   );
 
   const statuses = useMemo(
@@ -381,6 +403,35 @@ export default function ContactsPage() {
     a.href = `data:text/csv;charset=utf-8,${encodeURIComponent(csv)}`;
     a.download = "contacts-export.csv";
     a.click();
+  };
+
+  const openMerge = () => {
+    if (selected.size < 2) return;
+    const first = Array.from(selected)[0];
+    setMergeKeepId(first);
+    setMergeOpen(true);
+  };
+
+  const runMerge = async () => {
+    if (!mergeKeepId || selected.size < 2) return;
+    const mergeIds = Array.from(selected).filter((id) => id !== mergeKeepId);
+    if (!mergeIds.length) return;
+    setMerging(true);
+    setError(null);
+    const supabase = createClient();
+    const { error: rpcErr } = await supabase.rpc("merge_contacts", {
+      p_keep_id: mergeKeepId,
+      p_merge_ids: mergeIds,
+    });
+    setMerging(false);
+    if (rpcErr) {
+      setError(rpcErr.message);
+      return;
+    }
+    setMergeOpen(false);
+    setSelected(new Set());
+    setInspectorId(mergeKeepId);
+    load();
   };
 
   const stageClass = (name: string | null | undefined) => {
@@ -608,6 +659,11 @@ export default function ContactsPage() {
           <button type="button" className="app-btn" onClick={exportSelected}>
             Export CSV
           </button>
+          {selected.size >= 2 && (
+            <button type="button" className="app-btn" onClick={openMerge}>
+              Merge
+            </button>
+          )}
           <button type="button" className="app-btn" onClick={() => setSelected(new Set())}>
             Clear
           </button>
@@ -737,13 +793,23 @@ export default function ContactsPage() {
                 <td>
                   <div className="flex items-center gap-3">
                     <span className="avatar-circle">{initials(c.name)}</span>
-                    <Link
-                      href={`/app/contacts/${c.id}`}
-                      style={{ fontWeight: 600 }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {c.name}
-                    </Link>
+                    <div>
+                      <Link
+                        href={`/app/contacts/${c.id}`}
+                        style={{ fontWeight: 600 }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {c.name}
+                      </Link>
+                      {c.email &&
+                        duplicateEmails.has(c.email.trim().toLowerCase()) && (
+                          <div>
+                            <span className="status-pill status-pill-red" style={{ marginTop: 4 }}>
+                              Possible duplicate
+                            </span>
+                          </div>
+                        )}
+                    </div>
                   </div>
                 </td>
                 <td>{c.company || "—"}</td>
@@ -822,6 +888,54 @@ export default function ContactsPage() {
           Connect Gmail
         </Link>
       </p>
+
+      {mergeOpen && (
+        <div className="modal-backdrop" onClick={() => setMergeOpen(false)}>
+          <div className="modal-card space-y-3" onClick={(e) => e.stopPropagation()}>
+            <h2 className="app-section-title">Merge contacts</h2>
+            <p className="text-sm text-meta">
+              Pick which contact to keep. Deals, tasks, activities, and tags from the others
+              move onto the kept contact. Duplicate campaign enrollments are skipped.
+            </p>
+            <div className="space-y-2">
+              {selectedContacts.map((c) => (
+                <label
+                  key={c.id}
+                  className="flex items-center gap-3 app-card p-3 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="merge-keep"
+                    checked={mergeKeepId === c.id}
+                    onChange={() => setMergeKeepId(c.id)}
+                  />
+                  <span>
+                    <span style={{ fontWeight: 600 }}>{c.name}</span>
+                    {c.email && (
+                      <span className="font-data text-xs text-meta" style={{ marginLeft: 8 }}>
+                        {c.email}
+                      </span>
+                    )}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="app-btn app-btn-primary"
+                disabled={!mergeKeepId || merging}
+                onClick={runMerge}
+              >
+                {merging ? "Merging…" : "Merge"}
+              </button>
+              <button type="button" className="app-btn" onClick={() => setMergeOpen(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ContactInspector
         contactId={inspectorId}

@@ -26,11 +26,82 @@ export default function CampaignBuilderPage() {
   const [contacts, setContacts] = useState<{ id: string; name: string }[]>([]);
   const [enrollIds, setEnrollIds] = useState<string[]>([]);
   const [msg, setMsg] = useState("");
+  const [stats, setStats] = useState({
+    enrolled: 0,
+    sent: 0,
+    failed: 0,
+    opened: 0,
+    clicked: 0,
+    replied: 0,
+  });
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
   const locked = campaign?.status === "active";
+
+  const loadStats = useCallback(async (orgId: string, campaignId: string) => {
+    const supabase = createClient();
+    const { data: enrollments } = await supabase
+      .from("campaign_enrollments")
+      .select("id, contact_id")
+      .eq("campaign_id", campaignId);
+    const enrollmentIds = (enrollments || []).map((e) => e.id);
+    const contactIds = Array.from(
+      new Set((enrollments || []).map((e) => e.contact_id).filter(Boolean))
+    );
+
+    let sent = 0;
+    let failed = 0;
+    if (enrollmentIds.length) {
+      const { count: sentCount } = await supabase
+        .from("campaign_sends")
+        .select("id", { count: "exact", head: true })
+        .in("enrollment_id", enrollmentIds)
+        .eq("status", "sent");
+      const { count: failedCount } = await supabase
+        .from("campaign_sends")
+        .select("id", { count: "exact", head: true })
+        .in("enrollment_id", enrollmentIds)
+        .eq("status", "failed");
+      sent = sentCount || 0;
+      failed = failedCount || 0;
+    }
+
+    let opened = 0;
+    let clicked = 0;
+    let replied = 0;
+    if (contactIds.length) {
+      const { data: events } = await supabase
+        .from("scoring_events")
+        .select("event_type")
+        .eq("org_id", orgId)
+        .in("contact_id", contactIds)
+        .in("event_type", ["open", "click", "reply"]);
+      for (const ev of events || []) {
+        if (ev.event_type === "open") opened += 1;
+        if (ev.event_type === "click") clicked += 1;
+        if (ev.event_type === "reply") replied += 1;
+      }
+
+      const { count: openActs } = await supabase
+        .from("activities")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", orgId)
+        .eq("type", "email_opened")
+        .filter("meta->>campaign_id", "eq", campaignId);
+      if ((openActs || 0) > opened) opened = openActs || 0;
+    }
+
+    setStats({
+      enrolled: enrollments?.length || 0,
+      sent,
+      failed,
+      opened,
+      clicked,
+      replied,
+    });
+  }, []);
 
   const syncCanvas = (list: CampaignStep[]) => {
     setNodes(
@@ -87,8 +158,9 @@ export default function CampaignBuilderPage() {
         .eq("org_id", c.org_id)
         .limit(100);
       setContacts(contactsData || []);
+      await loadStats(c.org_id, id);
     }
-  }, [id]);
+  }, [id, loadStats]);
 
   useEffect(() => {
     load();
@@ -226,6 +298,7 @@ export default function CampaignBuilderPage() {
       onConflict: "campaign_id,contact_id",
     });
     setMsg(`Enrolled ${rows.length} contacts`);
+    await loadStats(campaign.org_id, campaign.id);
   };
 
   const onNodeDragStop = async (_: unknown, node: Node) => {
@@ -294,6 +367,24 @@ export default function CampaignBuilderPage() {
             </button>
           )}
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        {(
+          [
+            ["Enrolled", stats.enrolled],
+            ["Sent", stats.sent],
+            ["Failed", stats.failed],
+            ["Opened", stats.opened],
+            ["Clicked", stats.clicked],
+            ["Replied", stats.replied],
+          ] as const
+        ).map(([label, value]) => (
+          <div key={label} className="app-card p-4">
+            <div className="app-label">{label}</div>
+            <div className="app-stat-value font-data mt-2">{value}</div>
+          </div>
+        ))}
       </div>
 
       <div className="app-card p-4 flex flex-wrap gap-3 items-end">

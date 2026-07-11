@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Contact } from "@/lib/types";
 import CustomFieldsEditor from "@/components/app/CustomFieldsEditor";
+import ActivityComments from "@/components/app/ActivityComments";
 
 export default function ContactInspector({
   contactId,
@@ -19,6 +20,9 @@ export default function ContactInspector({
   const [note, setNote] = useState("");
   const [activities, setActivities] = useState<
     { id: string; type: string; body: string | null; created_at: string }[]
+  >([]);
+  const [scoreEvents, setScoreEvents] = useState<
+    { id: string; event_type: string; points: number; created_at: string }[]
   >([]);
   const [saving, setSaving] = useState(false);
 
@@ -48,6 +52,13 @@ export default function ContactInspector({
         .order("created_at", { ascending: false })
         .limit(30);
       setActivities(acts || []);
+      const { data: scores } = await supabase
+        .from("scoring_events")
+        .select("id, event_type, points, created_at")
+        .eq("contact_id", contactId)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      setScoreEvents(scores || []);
     };
     load();
   }, [contactId]);
@@ -158,6 +169,26 @@ export default function ContactInspector({
             </button>
 
             <div className="pt-4 border-t" style={{ borderColor: "var(--border)" }}>
+              <div className="app-label" style={{ marginBottom: 10 }}>Score history</div>
+              {scoreEvents.length === 0 && (
+                <p className="empty-inline">No scoring events yet.</p>
+              )}
+              <ul className="space-y-2">
+                {scoreEvents.map((e) => (
+                  <li key={e.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="status-pill status-pill-blue">
+                      {e.event_type.replace(/_/g, " ")}
+                    </span>
+                    <span className="font-data">+{e.points}</span>
+                    <span className="font-data text-xs" style={{ color: "var(--text-muted)" }}>
+                      {new Date(e.created_at).toLocaleString()}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="pt-4 border-t" style={{ borderColor: "var(--border)" }}>
               <CustomFieldsEditor orgId={contact.org_id} contactId={contact.id} />
             </div>
 
@@ -183,6 +214,7 @@ export default function ContactInspector({
                       </span>
                     </div>
                     {a.body && <p className="mt-1" style={{ color: "var(--text-secondary)" }}>{a.body}</p>}
+                    <ActivityComments activityId={a.id} orgId={contact.org_id} compact />
                   </li>
                 ))}
               </ul>

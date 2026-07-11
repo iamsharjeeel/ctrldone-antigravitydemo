@@ -47,6 +47,8 @@ Intake uses anon + `submit_intake` (security definer). Never import `@/lib/supab
 | `/app/settings/email` | Connected mailboxes + one-off send |
 | `/app/settings/templates` | Email templates CRUD |
 | `/app/settings/fields` | Custom contact fields |
+| `/app/settings/pipelines` | Create / default / delete pipelines |
+| `/app/settings/automations` | Deal-stage → create-task rules |
 | `/app/settings/suppression` | Suppression list |
 | `/app/settings/audit` | Audit log |
 
