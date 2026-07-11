@@ -1,0 +1,37 @@
+---
+description: Design system guardrails for CTRLDONE — read before any UI/styling change
+globs: "src/**/*.tsx,src/**/*.css"
+alwaysApply: true
+---
+
+Before styling or building any UI in this repo, read `DESIGN_SYSTEM.md` at the repo
+root — it is the canonical, code-verified reference for tokens, components, and
+conventions actually in use.
+
+Hard rules when working on this codebase:
+
+1. **Do not change the design system** — no new fonts, no new color values, no new
+   radii/spacing scale, no new shadow style. Build on top of what exists in
+   `DESIGN_SYSTEM.md` / `src/app/app.css` / `src/app/globals.css`.
+2. **Reuse existing component classes** (`.app-card`, `.app-btn`, `.app-input`,
+   `.status-pill`, `.empty-inline`, `.segmented`, etc. — full list in
+   `DESIGN_SYSTEM.md`) instead of writing new inline styles or new one-off CSS for
+   something the system already covers.
+3. Marketing (`/`, Geist, dark, glow) and the App+Login shell (`/app/*`, `/login`,
+   Poppins, light, SaaS cards) are intentionally different visual languages — never
+   blend them.
+4. If a task requires a genuinely new pattern not covered by `DESIGN_SYSTEM.md`,
+   compose it from the existing tokens (`--radius-app`, `--radius-pill`, the color
+   variables, the spacing scale) and add it to `app.css`/`globals.css` following the
+   existing `[data-shell="..."]` scoping convention — then note the addition rather
+   than inventing a parallel system.
+5. **Never touch the Poppins font wiring in `src/app/(app)/layout.tsx` or
+   `src/app/login/layout.tsx` without reading the "font-variable gotcha" section of
+   `DESIGN_SYSTEM.md` first.** A prior bug there (a `next/font` CSS variable declared
+   on a descendant element while the consuming rule matched an ancestor) silently
+   broke every font on the page down to the browser's serif fallback. The fix
+   redeclares the `--font-sans` custom property itself on the wrapper div, not just
+   `font-family` — don't simplify that back out.
+6. Ignore `design-spec.md`'s typography section (it specifies `Fredoka`, which was
+   superseded by Poppins/Geist per `HANDOVER.md`) — its color/spacing/radius/motion
+   sections for the marketing site are still accurate.
