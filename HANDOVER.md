@@ -2,7 +2,7 @@
 
 ## One-line status
 
-Branch `feature/roadmap-core-batch`: ROADMAP #7 recurring tasks · #9 notifications · #11 reports · #12 scoring rules (also includes #2/#4/#18/#19 from parallel batch). Apply migrations `20260711070000`–`20260711070600`.
+Branch `feature/roadmap-core-batch`: ROADMAP #13 booking links · #15 embeddable forms (plus prior #1–#12/#18–#19 and parallel #3/#8). Apply migrations `20260711072000_booking_pages.sql` + `20260711072100_forms.sql` (and earlier through `20260711071000` if needed).
 
 ## Manual steps (do now if Google needed)
 
@@ -11,7 +11,10 @@ Branch `feature/roadmap-core-batch`: ROADMAP #7 recurring tasks · #9 notificati
    - `http://127.0.0.1:54321/auth/v1/callback` (Supabase Auth login)
    - `http://localhost:3000/api/oauth/google/callback` (Gmail send connect)
 3. Restart local Supabase after setting Google env: `npx supabase stop` → `npx supabase start`.
-4. Apply migrations `20260711070400`–`20260711070600` (merge, automations, activity_comments). Mentions need `#9` notifications migration (`20260711070100`) if not applied.
+4. Apply migrations `20260711072000`–`20260711072100` (booking + forms). Also `20260711071000_reply_detection.sql` and earlier `20260711070000`–`20260711070600` if not applied.
+5. **Reconnect Gmail** accounts after deploy — OAuth scope now includes `gmail.readonly` for inbox poll; existing tokens with only `gmail.send` will fail poll until reauth.
+6. Optional: set `BOUNCE_WEBHOOK_SECRET` for `/api/email/bounce-webhook` (else uses `CRON_SECRET`).
+7. Booking: Settings → Booking → set slug → public `/book/{slug}`. Forms: Settings → Forms → save → hosted `/f/{id}` or embed snippet.
 
 ## Local stack
 
@@ -72,6 +75,8 @@ Source session: App UI polish + 10 features. Keep these as the visual north star
 
 ## What changed (this pass)
 
+- **ROADMAP #13/#15:** `booking_pages`/`bookings` + `create_booking`/`get_booking_page`; public `/book/[slug]`; Settings → Booking; `forms`/`form_submissions` + `submit_form`/`get_form`; Settings → Forms; hosted `/f/[id]`; `public/embed.js`
+- **ROADMAP #3/#8:** `cron/inbox-poll` (Gmail reply + bounce → `email_replied` / `suppression_list`); `email/bounce-webhook`; `provider_thread_id` + `last_synced_at`; campaigns already skip suppressed emails
 - **ROADMAP #2/#4/#18/#19 (batch B):** campaign builder stats; `merge_contacts` + bulk Merge + duplicate badge; `automation_rules` + Settings → Automations + `moveDeal` hook; `activity_comments` + Reply/@mentions
 - **ROADMAP #7/#9/#11/#12 (batch):** recurring tasks + cron; notifications table/prefs/digest; reports page + RPCs; scoring_rules + settings + inspector history
 - **ROADMAP #1:** Pipeline switcher via `?pipeline=` + `.segmented`; Settings → Pipelines create/default/delete (friendly FK error)
@@ -80,11 +85,11 @@ Source session: App UI polish + 10 features. Keep these as the visual north star
 - **Brand:** `Logo` in AppShell + login; lime/blue badge tokens restored under app/login shells
 - **Type:** Poppins (400–700); clearer hierarchy; no Playfair/Inter in CRM
 - **Shape:** cards 16px; buttons/inputs/search pills
-- **Nav:** Dashboard · Contacts · Pipeline · **Tasks** · Activity · **Reports**; settings include Scoring + Notifications
+- **Nav:** Dashboard · Contacts · Pipeline · **Tasks** · Activity · **Reports**; settings include Scoring + Notifications + Booking + Forms
 - **Pipeline:** richer deal cards (contact, close, days in stage); filters; contact picker on create
 - **Contacts:** real filters, CSV as Import, ContactInspector, bulk enroll/tag/export
 - **Contact detail:** score, deals, custom fields, in-app email compose + templates
-- **Settings:** Templates, Fields, Pipelines, Automations, Scoring, Notifications, Suppression, Audit pages
+- **Settings:** Templates, Fields, Pipelines, Automations, Scoring, Booking, Forms, Notifications, Suppression, Audit pages
 - **Activity:** timeline + replies/comments + “Open Tasks” link (no duplicate task create sidebar)
 - **Docs:** `DESIGN_SYSTEM.md`, `ROADMAP.md`, `.cursor/rules/*`
 
@@ -104,10 +109,14 @@ Source session: App UI polish + 10 features. Keep these as the visual north star
 - Logo: `src/components/Logo.tsx`
 - Settings: `src/app/(app)/app/settings/*`, `src/components/app/SettingsSubnav.tsx`
 - Tasks: `src/app/(app)/app/tasks/page.tsx`
+- Inbox poll: `src/app/api/cron/inbox-poll/route.ts`
+- Bounce webhook: `src/app/api/email/bounce-webhook/route.ts`
 - Plan ref (local): `.cursor/plans/app_ui_polish_6b3fe445.plan.md` (do not treat as source of truth over this file’s prompts)
 
 ## Pending / next
 
+- Reconnect Gmail after `gmail.readonly` scope change; apply `20260711071000`
 - Connect Google OAuth env if Continuity with Google / Gmail send needed
 - Hosted Supabase may still be blocked by org free-tier — local Docker is the working path
 - Optional: denser empty states, real team invite, campaign condition steps
+- Vercel Hobby may not allow `*/15` cron — upgrade or call inbox-poll externally if needed
