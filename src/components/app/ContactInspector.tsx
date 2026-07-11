@@ -208,7 +208,17 @@ export default function ContactInspector({
                 {activities.map((a) => (
                   <li key={a.id} className="text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="status-pill status-pill-blue">{a.type}</span>
+                      <span
+                        className={`status-pill ${
+                          a.type === "email_replied" || a.type === "email_opened"
+                            ? "status-pill-blue"
+                            : a.type === "email_sent"
+                              ? "status-pill-lime"
+                              : "status-pill-blue"
+                        }`}
+                      >
+                        {a.type.replace(/_/g, " ")}
+                      </span>
                       <span className="font-data text-xs" style={{ color: "var(--text-muted)" }}>
                         {new Date(a.created_at).toLocaleString()}
                       </span>

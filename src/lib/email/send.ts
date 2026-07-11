@@ -74,7 +74,7 @@ async function refreshMicrosoft(account: Account): Promise<string> {
   return json.access_token as string;
 }
 
-async function getAccessToken(account: Account): Promise<string> {
+export async function getAccessToken(account: Account): Promise<string> {
   const expired =
     !account.token_expires_at ||
     new Date(account.token_expires_at).getTime() < Date.now() + 60_000;
@@ -83,6 +83,26 @@ async function getAccessToken(account: Account): Promise<string> {
   }
   if (account.provider === "google") return refreshGoogle(account);
   return refreshMicrosoft(account);
+}
+
+async function fetchGmailMessageMeta(
+  token: string,
+  messageId: string
+): Promise<{ rfcMessageId?: string; threadId?: string }> {
+  const res = await fetch(
+    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}?format=metadata&metadataHeaders=Message-ID`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!res.ok) return {};
+  const json = (await res.json()) as {
+    threadId?: string;
+    payload?: { headers?: { name: string; value: string }[] };
+  };
+  const raw = json.payload?.headers?.find(
+    (h) => h.name.toLowerCase() === "message-id"
+  )?.value;
+  const rfcMessageId = raw?.replace(/^<|>$/g, "").trim();
+  return { rfcMessageId, threadId: json.threadId };
 }
 
 export async function markNeedsReauth(accountId: string, orgId: string) {
@@ -104,7 +124,10 @@ export async function sendViaAccount(opts: {
   to: string;
   subject: string;
   body: string;
-}): Promise<{ ok: true; id?: string } | { ok: false; reauth: boolean; error: string }> {
+}): Promise<
+  | { ok: true; id?: string; threadId?: string }
+  | { ok: false; reauth: boolean; error: string }
+> {
   try {
     const token = await getAccessToken(opts.account);
     if (opts.account.provider === "google") {
@@ -140,8 +163,15 @@ export async function sendViaAccount(opts: {
       if (!res.ok) {
         return { ok: false, reauth: false, error: await res.text() };
       }
-      const json = await res.json();
-      return { ok: true, id: json.id };
+      const json = (await res.json()) as { id?: string; threadId?: string };
+      let id = json.id;
+      let threadId = json.threadId;
+      if (json.id) {
+        const meta = await fetchGmailMessageMeta(token, json.id);
+        if (meta.rfcMessageId) id = meta.rfcMessageId;
+        if (meta.threadId) threadId = meta.threadId;
+      }
+      return { ok: true, id, threadId };
     }
 
     const res = await fetch("https://graph.microsoft.com/v1.0/me/sendMail", {

@@ -54,10 +54,15 @@ Intake uses anon + `submit_intake` (security definer). Never import `@/lib/supab
 
 ## Cron
 
-`vercel.json` schedules:
+`vercel.json` schedules (header `Authorization: Bearer $CRON_SECRET`):
 
-- `/api/cron/campaigns` every minute (header `Authorization: Bearer $CRON_SECRET`)
-- `/api/cron/stale-deals` daily
+- `/api/cron/campaigns` — campaign step worker
+- `/api/cron/stale-deals` — daily stale deal alerts
+- `/api/cron/recurring-tasks` — recurring task spawn
+- `/api/cron/notification-digest` — email digests
+- `/api/cron/inbox-poll` — Gmail reply + bounce detection (every 15m)
+
+Optional: `POST /api/email/bounce-webhook` with `BOUNCE_WEBHOOK_SECRET` or `CRON_SECRET` for provider bounce hooks.
 
 ## Design tokens
 

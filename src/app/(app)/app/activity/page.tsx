@@ -84,7 +84,18 @@ export default function ActivityPage() {
             {items.map((a) => (
               <div key={a.id} className="timeline-item">
                 <div className="flex flex-wrap items-baseline gap-2">
-                  <span style={{ fontWeight: 600, textTransform: "capitalize" }}>
+                  <span
+                    className={
+                      a.type === "email_replied"
+                        ? "status-pill status-pill-blue"
+                        : undefined
+                    }
+                    style={
+                      a.type === "email_replied"
+                        ? undefined
+                        : { fontWeight: 600, textTransform: "capitalize" }
+                    }
+                  >
                     {a.type.replace(/_/g, " ")}
                   </span>
                   {a.contacts?.name && (
