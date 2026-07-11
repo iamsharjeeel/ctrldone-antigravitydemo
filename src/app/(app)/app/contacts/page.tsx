@@ -60,6 +60,10 @@ export default function ContactsPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [inspectorId, setInspectorId] = useState<string | null>(null);
   const [filters, setFilters] = useState({ status: "", stage: "", tag: "" });
+  const [segments, setSegments] = useState<{ id: string; name: string; filters: { status?: string; stage?: string; tag?: string } }[]>([]);
+  const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null);
+  const [segmentName, setSegmentName] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
   const [campaigns, setCampaigns] = useState<{ id: string; name: string; org_id: string }[]>([]);
   const [bulkCampaignId, setBulkCampaignId] = useState("");
   const [bulkTag, setBulkTag] = useState("");
@@ -70,6 +74,7 @@ export default function ContactsPage() {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return;
+    setUserId(user.id);
     const { data: mem } = await supabase
       .from("org_members")
       .select("org_id")
@@ -132,6 +137,19 @@ export default function ContactsPage() {
       .eq("org_id", mem.org_id)
       .neq("status", "archived");
     setCampaigns(camps || []);
+
+    const { data: segs } = await supabase
+      .from("saved_segments")
+      .select("id, name, filters")
+      .eq("org_id", mem.org_id)
+      .order("name");
+    setSegments(
+      (segs || []).map((s) => ({
+        id: s.id,
+        name: s.name,
+        filters: (s.filters || {}) as { status?: string; stage?: string; tag?: string },
+      }))
+    );
   }, [q]);
 
   useEffect(() => {
@@ -471,6 +489,83 @@ export default function ContactsPage() {
           >
             Clear
           </button>
+          <div className="flex flex-wrap gap-2 items-center">
+            <input
+              className="app-input"
+              style={{ maxWidth: 180 }}
+              placeholder="Segment name"
+              value={segmentName}
+              onChange={(e) => setSegmentName(e.target.value)}
+            />
+            <button
+              type="button"
+              className="app-btn app-btn-primary"
+              onClick={async () => {
+                if (!orgId || !segmentName.trim()) return;
+                setError(null);
+                const supabase = createClient();
+                const { error: insertErr } = await supabase.from("saved_segments").upsert(
+                  {
+                    org_id: orgId,
+                    name: segmentName.trim(),
+                    filters,
+                    created_by: userId,
+                  },
+                  { onConflict: "org_id,name" }
+                );
+                if (insertErr) {
+                  setError(insertErr.message);
+                  return;
+                }
+                setSegmentName("");
+                load();
+              }}
+            >
+              Save as segment
+            </button>
+          </div>
+        </div>
+      )}
+
+      {segments.length > 0 && (
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="app-label">Segments</span>
+          {segments.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              className="app-btn"
+              style={
+                activeSegmentId === s.id
+                  ? { background: "var(--forest)", color: "#fff", borderColor: "var(--forest)" }
+                  : undefined
+              }
+              onClick={() => {
+                setActiveSegmentId(s.id);
+                setPage(0);
+                setShowFilter(true);
+                setFilters({
+                  status: s.filters.status || "",
+                  stage: s.filters.stage || "",
+                  tag: s.filters.tag || "",
+                });
+              }}
+            >
+              {s.name}
+            </button>
+          ))}
+          {activeSegmentId && (
+            <button
+              type="button"
+              className="app-btn"
+              onClick={() => {
+                setActiveSegmentId(null);
+                setFilters({ status: "", stage: "", tag: "" });
+              }}
+            >
+              Clear segment
+            </button>
+          )}
         </div>
       )}
 
