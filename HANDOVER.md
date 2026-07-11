@@ -2,7 +2,7 @@
 
 ## One-line status
 
-Roadmap in progress on `feature/10-global-search`: ⌘K searches contacts **+ deals + tasks** (ROADMAP #10). Prior: Logo + Poppins CRM polish, design system + 20-feature roadmap docs.
+Roadmap: `#10` global ⌘K search done (`feature/10-global-search`); `#5` custom field types on `feature/5-custom-field-types` (shared editor in inspector + contact detail). Next: `#1` multi-pipeline.
 
 ## Manual steps (do now if Google needed)
 
@@ -71,6 +71,7 @@ Source session: App UI polish + 10 features. Keep these as the visual north star
 
 ## What changed (this pass)
 
+- **ROADMAP #5:** Shared `CustomFieldsEditor` (text/number/date/boolean/select) in ContactInspector + contact detail; settings/fields validates select options
 - **ROADMAP #10:** `CommandPalette` searches contacts, deals, and tasks (org-scoped), grouped under Actions / Contacts / Deals / Tasks headers; deal → `/app/deals/[id]`, task → `/app/tasks`
 - **Brand:** `Logo` in AppShell + login; lime/blue badge tokens restored under app/login shells
 - **Type:** Poppins (400–700); clearer hierarchy; no Playfair/Inter in CRM

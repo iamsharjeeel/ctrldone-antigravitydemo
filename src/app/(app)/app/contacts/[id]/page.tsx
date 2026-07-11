@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Contact } from "@/lib/types";
 import ErrorBanner from "@/components/app/ErrorBanner";
+import CustomFieldsEditor from "@/components/app/CustomFieldsEditor";
 import { Building2, Mail, MapPin, Phone, Plus, X } from "lucide-react";
 
 function initials(name: string) {
@@ -17,16 +18,6 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-type Attr = {
-  id: string;
-  key: string;
-  label: string;
-  field_type: string;
-  options: unknown;
-};
-
-type AttrValue = { attribute_id: string; value: unknown };
-
 export default function ContactDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [contact, setContact] = useState<Contact | null>(null);
@@ -36,8 +27,6 @@ export default function ContactDetailPage() {
   const [deals, setDeals] = useState<
     { id: string; title: string; value: number; currency: string; pipeline_stages?: { name?: string } | null }[]
   >([]);
-  const [attrs, setAttrs] = useState<Attr[]>([]);
-  const [attrValues, setAttrValues] = useState<Record<string, unknown>>({});
   const [note, setNote] = useState("");
   const [showLog, setShowLog] = useState(false);
   const [typeFilter, setTypeFilter] = useState("");
@@ -93,23 +82,6 @@ export default function ContactDetailPage() {
       }))
     );
 
-    const { data: a } = await supabase
-      .from("contact_attributes")
-      .select("id, key, label, field_type, options")
-      .eq("org_id", data.org_id)
-      .order("label");
-    setAttrs(a || []);
-
-    const { data: vals } = await supabase
-      .from("contact_attribute_values")
-      .select("attribute_id, value")
-      .eq("contact_id", id);
-    const map: Record<string, unknown> = {};
-    ((vals as AttrValue[]) || []).forEach((v) => {
-      map[v.attribute_id] = v.value;
-    });
-    setAttrValues(map);
-
     const { data: acc } = await supabase
       .from("email_accounts")
       .select("id, from_email")
@@ -161,21 +133,6 @@ export default function ContactDetailPage() {
       setError(updateErr.message);
       return;
     }
-  };
-
-  const saveAttr = async (attributeId: string, value: unknown) => {
-    if (!contact) return;
-    setAttrValues((prev) => ({ ...prev, [attributeId]: value }));
-    const supabase = createClient();
-    await supabase.from("contact_attribute_values").upsert(
-      {
-        org_id: contact.org_id,
-        contact_id: contact.id,
-        attribute_id: attributeId,
-        value,
-      },
-      { onConflict: "contact_id,attribute_id" }
-    );
   };
 
   const addNote = async () => {
@@ -371,75 +328,8 @@ export default function ContactDetailPage() {
             />
           </div>
 
-          <div className="app-card p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="app-section-title">Custom fields</h2>
-              <Link href="/app/settings/fields" className="text-xs" style={{ fontWeight: 600, color: "var(--forest)" }}>
-                Manage
-              </Link>
-            </div>
-            {attrs.map((a) => {
-              const raw = attrValues[a.id];
-              const display =
-                typeof raw === "string" || typeof raw === "number" || typeof raw === "boolean"
-                  ? String(raw)
-                  : raw == null
-                    ? ""
-                    : JSON.stringify(raw).replace(/^"|"$/g, "");
-              const options = Array.isArray(a.options) ? (a.options as string[]) : [];
-              if (a.field_type === "boolean") {
-                return (
-                  <label key={a.id} className="flex items-center gap-2 text-sm" style={{ fontWeight: 500 }}>
-                    <input
-                      type="checkbox"
-                      checked={Boolean(raw)}
-                      onChange={(e) => saveAttr(a.id, e.target.checked)}
-                    />
-                    {a.label}
-                  </label>
-                );
-              }
-              if (a.field_type === "select") {
-                return (
-                  <label key={a.id} className="app-label block">
-                    {a.label}
-                    <select
-                      className="app-input mt-1"
-                      value={display}
-                      onChange={(e) => saveAttr(a.id, e.target.value)}
-                    >
-                      <option value="">—</option>
-                      {options.map((o) => (
-                        <option key={o} value={o}>
-                          {o}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                );
-              }
-              return (
-                <label key={a.id} className="app-label block">
-                  {a.label}
-                  <input
-                    className="app-input mt-1"
-                    type={a.field_type === "number" ? "number" : a.field_type === "date" ? "date" : "text"}
-                    value={display}
-                    onChange={(e) =>
-                      saveAttr(
-                        a.id,
-                        a.field_type === "number" ? Number(e.target.value) : e.target.value
-                      )
-                    }
-                  />
-                </label>
-              );
-            })}
-            {!attrs.length && (
-              <p className="text-sm" style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
-                No custom fields. Define them in Settings → Fields.
-              </p>
-            )}
+          <div className="app-card p-5">
+            <CustomFieldsEditor orgId={contact.org_id} contactId={contact.id} />
           </div>
 
           <div className="app-card p-5">

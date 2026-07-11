@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Contact } from "@/lib/types";
+import CustomFieldsEditor from "@/components/app/CustomFieldsEditor";
 
 export default function ContactInspector({
   contactId,
@@ -155,6 +156,10 @@ export default function ContactInspector({
             <button type="button" className="app-btn app-btn-primary" onClick={save} disabled={saving}>
               {saving ? "Saving…" : "Save"}
             </button>
+
+            <div className="pt-4 border-t" style={{ borderColor: "var(--border)" }}>
+              <CustomFieldsEditor orgId={contact.org_id} contactId={contact.id} />
+            </div>
 
             <div className="pt-4 border-t" style={{ borderColor: "var(--border)" }}>
               <div className="app-label" style={{ marginBottom: 10 }}>Activity</div>

@@ -60,6 +60,16 @@ export default function FieldsPage() {
   const create = async () => {
     if (!orgId || !form.key.trim() || !form.label.trim()) return;
     setError(null);
+    if (form.field_type === "select") {
+      const opts = form.options
+        .split(",")
+        .map((o) => o.trim())
+        .filter(Boolean);
+      if (opts.length < 2) {
+        setError("Select fields need at least 2 comma-separated options.");
+        return;
+      }
+    }
     const key = form.key
       .trim()
       .toLowerCase()
@@ -161,7 +171,17 @@ export default function FieldsPage() {
               <tr key={a.id}>
                 <td style={{ fontWeight: 600 }}>{a.label}</td>
                 <td className="font-data">{a.key}</td>
-                <td>{a.field_type}</td>
+                <td>
+                  <span className="status-pill status-pill-blue">{a.field_type}</span>
+                  {a.field_type === "select" && Array.isArray(a.options) && a.options.length > 0 && (
+                    <span
+                      className="text-meta"
+                      style={{ display: "block", marginTop: 4, fontWeight: 500 }}
+                    >
+                      {(a.options as string[]).join(", ")}
+                    </span>
+                  )}
+                </td>
                 <td>
                   <button type="button" className="app-btn" onClick={() => remove(a.id)}>
                     Delete
@@ -171,8 +191,8 @@ export default function FieldsPage() {
             ))}
             {!attrs.length && (
               <tr>
-                <td colSpan={4} style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
-                  No custom fields yet.
+                <td colSpan={4} className="empty-row">
+                  No custom fields yet. Add text, number, date, boolean, or select above.
                 </td>
               </tr>
             )}
