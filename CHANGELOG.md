@@ -1,5 +1,6 @@
 # Changelog
 
+- 2026-07-11 — ROADMAP #1: multi-pipeline switcher (?pipeline=) + Settings → Pipelines create/default/delete
 - 2026-07-11 — ROADMAP #5: CustomFieldsEditor (all schema field types) in inspector + contact detail; select option validation
 - 2026-07-11 — ROADMAP #10: ⌘K command palette searches contacts, deals, and tasks (grouped results)
 - 2026-07-11 — HANDOVER: exact UI vision prompts from polish chat; commit + push CRM UI polish + 10 features

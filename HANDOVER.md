@@ -2,7 +2,7 @@
 
 ## One-line status
 
-Roadmap: `#10` global ⌘K search done (`feature/10-global-search`); `#5` custom field types on `feature/5-custom-field-types` (shared editor in inspector + contact detail). Next: `#1` multi-pipeline.
+Roadmap branches: `#10` global search · `#5` custom fields · `#1` multi-pipeline (current: `feature/1-multi-pipeline`). Next suggested: `#6` saved segments.
 
 ## Manual steps (do now if Google needed)
 
@@ -71,6 +71,7 @@ Source session: App UI polish + 10 features. Keep these as the visual north star
 
 ## What changed (this pass)
 
+- **ROADMAP #1:** Pipeline switcher via `?pipeline=` + `.segmented`; Settings → Pipelines create/default/delete (friendly FK error)
 - **ROADMAP #5:** Shared `CustomFieldsEditor` (text/number/date/boolean/select) in ContactInspector + contact detail; settings/fields validates select options
 - **ROADMAP #10:** `CommandPalette` searches contacts, deals, and tasks (org-scoped), grouped under Actions / Contacts / Deals / Tasks headers; deal → `/app/deals/[id]`, task → `/app/tasks`
 - **Brand:** `Logo` in AppShell + login; lime/blue badge tokens restored under app/login shells
@@ -80,7 +81,7 @@ Source session: App UI polish + 10 features. Keep these as the visual north star
 - **Pipeline:** richer deal cards (contact, close, days in stage); filters; contact picker on create
 - **Contacts:** real filters, CSV as Import, ContactInspector, bulk enroll/tag/export
 - **Contact detail:** score, deals, custom fields, in-app email compose + templates
-- **Settings:** Templates, Fields, Suppression, Audit pages (existing tables, no new migrations)
+- **Settings:** Templates, Fields, Pipelines, Suppression, Audit pages
 - **Activity:** timeline + “Open Tasks” link (no duplicate task create sidebar)
 - **Docs:** `DESIGN_SYSTEM.md`, `ROADMAP.md`, `.cursor/rules/*`
 

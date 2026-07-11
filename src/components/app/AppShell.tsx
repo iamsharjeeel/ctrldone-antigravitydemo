@@ -20,6 +20,7 @@ const settingsLinks = [
   { href: "/app/settings/email", label: "Email" },
   { href: "/app/settings/templates", label: "Templates" },
   { href: "/app/settings/fields", label: "Fields" },
+  { href: "/app/settings/pipelines", label: "Pipelines" },
   { href: "/app/settings/suppression", label: "Suppression" },
   { href: "/app/settings/audit", label: "Audit" },
   { href: "/app/settings/org", label: "Organization" },

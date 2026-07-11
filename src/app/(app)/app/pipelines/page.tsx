@@ -2,11 +2,13 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import ErrorBanner from "@/components/app/ErrorBanner";
 import { Filter, Plus, X } from "lucide-react";
 
 type Stage = { id: string; name: string; position: number };
+type PipelineOpt = { id: string; name: string; is_default: boolean };
 type ContactOpt = { id: string; name: string; company: string | null };
 type Deal = {
   id: string;
@@ -27,6 +29,11 @@ function daysInStage(entered: string | null) {
 }
 
 export default function PipelinesPage() {
+  const search = useSearchParams();
+  const router = useRouter();
+  const pipelineParam = search.get("pipeline");
+
+  const [pipelines, setPipelines] = useState<PipelineOpt[]>([]);
   const [stages, setStages] = useState<Stage[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [contacts, setContacts] = useState<ContactOpt[]>([]);
@@ -74,23 +81,35 @@ export default function PipelinesPage() {
       .from("pipelines")
       .select("id, name, is_default")
       .eq("org_id", mem.org_id)
-      .order("is_default", { ascending: false });
+      .order("is_default", { ascending: false })
+      .order("name");
     if (pipeErr) {
       setError(pipeErr.message);
       return;
     }
-    const pipe = pipes?.[0];
-    if (!pipe) {
-      setError("No pipeline found. Re-run org bootstrap.");
+    const list = (pipes as PipelineOpt[]) || [];
+    setPipelines(list);
+    if (!list.length) {
+      setError("No pipeline found. Create one in Settings → Pipelines.");
       return;
     }
-    setPipelineId(pipe.id);
-    setPipelineName(pipe.name);
+
+    const selected =
+      list.find((p) => p.id === pipelineParam) ||
+      list.find((p) => p.is_default) ||
+      list[0];
+
+    if (pipelineParam !== selected.id) {
+      router.replace(`/app/pipelines?pipeline=${selected.id}`);
+    }
+
+    setPipelineId(selected.id);
+    setPipelineName(selected.name);
 
     const { data: st } = await supabase
       .from("pipeline_stages")
       .select("id, name, position")
-      .eq("pipeline_id", pipe.id)
+      .eq("pipeline_id", selected.id)
       .order("position");
     setStages((st || []).filter((s) => s.name.toLowerCase() !== "lost"));
 
@@ -99,7 +118,7 @@ export default function PipelinesPage() {
       .select(
         "id, title, value, currency, stage_id, contact_id, expected_close, stage_entered_at, contacts(name, company)"
       )
-      .eq("pipeline_id", pipe.id);
+      .eq("pipeline_id", selected.id);
     if (dealErr) {
       setError(dealErr.message);
       return;
@@ -113,11 +132,15 @@ export default function PipelinesPage() {
       .order("name")
       .limit(200);
     setContacts((c as ContactOpt[]) || []);
-  }, []);
+  }, [pipelineParam, router]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  const selectPipeline = (id: string) => {
+    router.push(`/app/pipelines?pipeline=${id}`);
+  };
 
   const filteredDeals = useMemo(() => {
     const min = Number(filters.minValue) || 0;
@@ -194,8 +217,28 @@ export default function PipelinesPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="app-page-title">{pipelineName} Pipeline</h1>
-          <p className="app-page-sub">Showing all active deals. Last updated just now.</p>
+          <h1 className="app-page-title">{pipelineName}</h1>
+          <p className="app-page-sub">
+            Showing active deals for this pipeline.{" "}
+            <Link href="/app/settings/pipelines" style={{ color: "var(--forest)", fontWeight: 600 }}>
+              Manage pipelines
+            </Link>
+          </p>
+          {pipelines.length > 1 && (
+            <div className="segmented mt-3" role="tablist" aria-label="Pipelines">
+              {pipelines.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className="segmented-btn"
+                  data-active={p.id === pipelineId}
+                  onClick={() => selectPipeline(p.id)}
+                >
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
           <button
