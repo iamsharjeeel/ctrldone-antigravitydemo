@@ -1,5 +1,6 @@
 # Changelog
 
+- 2026-07-11 — ROADMAP #10: ⌘K command palette searches contacts, deals, and tasks (grouped results)
 - 2026-07-11 — HANDOVER: exact UI vision prompts from polish chat; commit + push CRM UI polish + 10 features
 - 2026-07-11 — App UI polish: Logo + Poppins + pill radii; Tasks nav; rich pipeline cards; notifications; filters/inspector/bulk; templates/fields/suppression/audit; in-app email
 - 2026-07-11 — CRM: S1mpleCRM-matched light UI (/login + /app), bootstrap+table grants, mutation errors, Google OAuth wiring

@@ -2,7 +2,7 @@
 
 ## One-line status
 
-CRM UI polish shipped: landing **Logo** + **Poppins** + pill/curve radii app-wide; Tasks in nav; richer pipeline cards; notifications bell; filters/inspector/bulk contacts; email templates, custom fields, suppression, audit; in-app contact email.
+Roadmap in progress on `feature/10-global-search`: ⌘K searches contacts **+ deals + tasks** (ROADMAP #10). Prior: Logo + Poppins CRM polish, design system + 20-feature roadmap docs.
 
 ## Manual steps (do now if Google needed)
 
@@ -71,6 +71,7 @@ Source session: App UI polish + 10 features. Keep these as the visual north star
 
 ## What changed (this pass)
 
+- **ROADMAP #10:** `CommandPalette` searches contacts, deals, and tasks (org-scoped), grouped under Actions / Contacts / Deals / Tasks headers; deal → `/app/deals/[id]`, task → `/app/tasks`
 - **Brand:** `Logo` in AppShell + login; lime/blue badge tokens restored under app/login shells
 - **Type:** Poppins (400–700); clearer hierarchy; no Playfair/Inter in CRM
 - **Shape:** cards 16px; buttons/inputs/search pills
@@ -80,6 +81,7 @@ Source session: App UI polish + 10 features. Keep these as the visual north star
 - **Contact detail:** score, deals, custom fields, in-app email compose + templates
 - **Settings:** Templates, Fields, Suppression, Audit pages (existing tables, no new migrations)
 - **Activity:** timeline + “Open Tasks” link (no duplicate task create sidebar)
+- **Docs:** `DESIGN_SYSTEM.md`, `ROADMAP.md`, `.cursor/rules/*`
 
 ## Hard rules (do not regress)
 
