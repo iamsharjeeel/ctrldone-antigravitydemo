@@ -14,6 +14,7 @@ const nav = [
   { href: "/app/pipelines", label: "Pipeline" },
   { href: "/app/tasks", label: "Tasks" },
   { href: "/app/activity", label: "Activity" },
+  { href: "/app/reports", label: "Reports" },
 ];
 
 const settingsLinks = [
@@ -21,6 +22,9 @@ const settingsLinks = [
   { href: "/app/settings/templates", label: "Templates" },
   { href: "/app/settings/fields", label: "Fields" },
   { href: "/app/settings/pipelines", label: "Pipelines" },
+  { href: "/app/settings/automations", label: "Automations" },
+  { href: "/app/settings/scoring", label: "Scoring" },
+  { href: "/app/settings/notifications", label: "Notifications" },
   { href: "/app/settings/suppression", label: "Suppression" },
   { href: "/app/settings/audit", label: "Audit" },
   { href: "/app/settings/org", label: "Organization" },
@@ -28,7 +32,13 @@ const settingsLinks = [
   { href: "/app/campaigns", label: "Campaigns" },
 ];
 
-type Notif = { id: string; title: string; sub: string; href: string };
+type Notif = {
+  id: string;
+  title: string;
+  sub: string;
+  href: string;
+  read: boolean;
+};
 
 export default function AppShell({
   children,
@@ -68,74 +78,39 @@ export default function AppShell({
       .maybeSingle();
     if (!mem) return;
 
-    const items: Notif[] = [];
-
-    const { data: tasks } = await supabase
-      .from("tasks")
-      .select("id, title, due_at")
+    const { data } = await supabase
+      .from("notifications")
+      .select("id, title, body, link, read_at, created_at")
       .eq("org_id", mem.org_id)
-      .eq("assignee_id", user.id)
-      .eq("status", "open")
-      .order("due_at", { ascending: true, nullsFirst: false })
-      .limit(5);
-    (tasks || []).forEach((t) => {
-      items.push({
-        id: `task-${t.id}`,
-        title: t.title,
-        sub: t.due_at
-          ? `Due ${new Date(t.due_at).toLocaleDateString()}`
-          : "Open task",
-        href: "/app/tasks",
-      });
-    });
-
-    const { data: acts } = await supabase
-      .from("activities")
-      .select("id, type, body, created_at")
-      .eq("org_id", mem.org_id)
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(5);
-    (acts || []).forEach((a) => {
-      items.push({
-        id: `act-${a.id}`,
-        title: a.type.replace(/_/g, " "),
-        sub: a.body || new Date(a.created_at).toLocaleString(),
-        href: "/app/activity",
-      });
-    });
+      .limit(20);
 
-    const { data: camps } = await supabase
-      .from("campaigns")
-      .select("id, name, status")
-      .eq("org_id", mem.org_id)
-      .eq("status", "paused")
-      .limit(5);
-    (camps || []).forEach((c) => {
-      items.push({
-        id: `camp-${c.id}`,
-        title: `Paused: ${c.name}`,
-        sub: "Campaign paused",
-        href: "/app/campaigns",
-      });
-    });
-
-    const { data: accounts } = await supabase
-      .from("email_accounts")
-      .select("id, email, status")
-      .eq("org_id", mem.org_id)
-      .eq("status", "needs_reauth")
-      .limit(5);
-    (accounts || []).forEach((a) => {
-      items.push({
-        id: `email-${a.id}`,
-        title: "Email needs reauth",
-        sub: a.email || "Reconnect account",
-        href: "/app/settings/email",
-      });
-    });
-
-    setNotifs(items);
+    setNotifs(
+      (data || []).map((n) => ({
+        id: n.id,
+        title: n.title,
+        sub: n.body || new Date(n.created_at).toLocaleString(),
+        href: n.link || "/app",
+        read: !!n.read_at,
+      }))
+    );
   }, []);
+
+  const markAllRead = async () => {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+    const unreadIds = notifs.filter((n) => !n.read).map((n) => n.id);
+    if (!unreadIds.length) return;
+    await supabase
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .in("id", unreadIds);
+    loadNotifs();
+  };
 
   useEffect(() => {
     loadNotifs();
@@ -176,12 +151,7 @@ export default function AppShell({
     router.push(`/app/contacts?q=${encodeURIComponent(term)}`);
   };
 
-  const badgeCount = notifs.filter(
-    (n) =>
-      n.id.startsWith("task-") ||
-      n.id.startsWith("camp-") ||
-      n.id.startsWith("email-")
-  ).length;
+  const badgeCount = notifs.filter((n) => !n.read).length;
 
   return (
     <div className="app-shell">
@@ -230,10 +200,20 @@ export default function AppShell({
             {notifOpen && (
               <div className="app-card notif-panel">
                 <div
-                  className="app-label"
+                  className="flex items-center justify-between"
                   style={{ padding: "8px 12px 4px" }}
                 >
-                  Notifications
+                  <div className="app-label">Notifications</div>
+                  {badgeCount > 0 && (
+                    <button
+                      type="button"
+                      className="app-btn"
+                      style={{ padding: "2px 8px", fontSize: 12 }}
+                      onClick={markAllRead}
+                    >
+                      Mark all read
+                    </button>
+                  )}
                 </div>
                 {notifs.length === 0 && (
                   <div className="notif-item-sub" style={{ padding: 12 }}>
@@ -245,11 +225,10 @@ export default function AppShell({
                     key={n.id}
                     href={n.href}
                     className="notif-item"
+                    style={{ opacity: n.read ? 0.65 : 1 }}
                     onClick={() => setNotifOpen(false)}
                   >
-                    <div className="notif-item-title" style={{ textTransform: "capitalize" }}>
-                      {n.title}
-                    </div>
+                    <div className="notif-item-title">{n.title}</div>
                     <div className="notif-item-sub">{n.sub}</div>
                   </Link>
                 ))}

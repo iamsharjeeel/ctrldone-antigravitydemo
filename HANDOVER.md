@@ -2,7 +2,7 @@
 
 ## One-line status
 
-Branch `feature/roadmap-core-batch-b`: ROADMAP #2 campaign analytics · #4 contact merge · #18 automations · #19 activity comments (on top of batch A #7/#9/#11/#12).
+Branch `feature/roadmap-core-batch`: ROADMAP #7 recurring tasks · #9 notifications · #11 reports · #12 scoring rules (also includes #2/#4/#18/#19 from parallel batch). Apply migrations `20260711070000`–`20260711070600`.
 
 ## Manual steps (do now if Google needed)
 

@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import ErrorBanner from "@/components/app/ErrorBanner";
+import { createNotification } from "@/lib/notifications";
 
 type TaskRow = {
   id: string;
@@ -12,7 +13,16 @@ type TaskRow = {
   assignee_id: string | null;
   contact_id: string | null;
   deal_id: string | null;
+  priority: string;
+  task_type: string | null;
+  recurrence_rule: string | null;
 };
+
+function priorityDot(priority: string) {
+  if (priority === "high") return "stage-dot stage-dot-lost";
+  if (priority === "low") return "stage-dot";
+  return "stage-dot stage-dot-won";
+}
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<TaskRow[]>([]);
@@ -21,6 +31,9 @@ export default function TasksPage() {
   const [filter, setFilter] = useState<"mine" | "team">("mine");
   const [title, setTitle] = useState("");
   const [dueAt, setDueAt] = useState("");
+  const [priority, setPriority] = useState("normal");
+  const [taskType, setTaskType] = useState("");
+  const [recurrence, setRecurrence] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -44,7 +57,9 @@ export default function TasksPage() {
 
     let q = supabase
       .from("tasks")
-      .select("id, title, due_at, status, assignee_id, contact_id, deal_id")
+      .select(
+        "id, title, due_at, status, assignee_id, contact_id, deal_id, priority, task_type, recurrence_rule"
+      )
       .eq("org_id", mem.org_id)
       .neq("status", "cancelled")
       .order("due_at", { ascending: true, nullsFirst: false });
@@ -56,7 +71,11 @@ export default function TasksPage() {
       setError(loadErr.message);
       return;
     }
-    setTasks((data as TaskRow[]) || []);
+    const rows = ((data as TaskRow[]) || []).slice().sort((a, b) => {
+      const rank = (p: string) => (p === "high" ? 0 : p === "normal" ? 1 : 2);
+      return rank(a.priority || "normal") - rank(b.priority || "normal");
+    });
+    setTasks(rows);
   }, [filter]);
 
   useEffect(() => {
@@ -67,11 +86,15 @@ export default function TasksPage() {
     if (!orgId || !title.trim()) return;
     setError(null);
     const supabase = createClient();
+    const assignee = userId;
     const { error: insertErr } = await supabase.from("tasks").insert({
       org_id: orgId,
       title: title.trim(),
-      assignee_id: userId,
+      assignee_id: assignee,
       status: "open",
+      priority,
+      task_type: taskType.trim() || null,
+      recurrence_rule: recurrence || null,
       due_at: dueAt
         ? new Date(dueAt).toISOString()
         : new Date().toISOString(),
@@ -80,8 +103,21 @@ export default function TasksPage() {
       setError(insertErr.message);
       return;
     }
+    if (assignee) {
+      await createNotification(supabase, {
+        orgId,
+        userId: assignee,
+        type: "task_assigned",
+        title: `Task: ${title.trim()}`,
+        body: dueAt ? `Due ${dueAt}` : "Assigned to you",
+        link: "/app/tasks",
+      });
+    }
     setTitle("");
     setDueAt("");
+    setPriority("normal");
+    setTaskType("");
+    setRecurrence("");
     load();
   };
 
@@ -145,7 +181,7 @@ export default function TasksPage() {
       <div className="flex flex-wrap gap-2 items-center">
         <input
           className="app-input"
-          style={{ maxWidth: 320 }}
+          style={{ maxWidth: 280 }}
           placeholder="New task"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -155,11 +191,45 @@ export default function TasksPage() {
         />
         <input
           className="app-input"
-          style={{ maxWidth: 180 }}
+          style={{ maxWidth: 160 }}
           type="date"
           value={dueAt}
           onChange={(e) => setDueAt(e.target.value)}
         />
+        <select
+          className="app-input"
+          style={{ maxWidth: 120 }}
+          value={priority}
+          onChange={(e) => setPriority(e.target.value)}
+        >
+          <option value="low">Low</option>
+          <option value="normal">Normal</option>
+          <option value="high">High</option>
+        </select>
+        <select
+          className="app-input"
+          style={{ maxWidth: 140 }}
+          value={taskType}
+          onChange={(e) => setTaskType(e.target.value)}
+        >
+          <option value="">Type</option>
+          <option value="call">Call</option>
+          <option value="email">Email</option>
+          <option value="follow_up">Follow-up</option>
+          <option value="renewal">Renewal</option>
+          <option value="other">Other</option>
+        </select>
+        <select
+          className="app-input"
+          style={{ maxWidth: 140 }}
+          value={recurrence}
+          onChange={(e) => setRecurrence(e.target.value)}
+        >
+          <option value="">No repeat</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
         <button type="button" className="app-btn app-btn-primary" onClick={create}>
           Add
         </button>
@@ -170,6 +240,7 @@ export default function TasksPage() {
           <thead>
             <tr>
               <th style={{ width: 40 }} />
+              <th style={{ width: 36 }} />
               <th>Task</th>
               <th>Due</th>
               <th>Status</th>
@@ -178,7 +249,9 @@ export default function TasksPage() {
           <tbody>
             {tasks.map((t) => {
               const overdue =
-                t.status !== "done" && !!t.due_at && new Date(t.due_at) < new Date(new Date().toDateString());
+                t.status !== "done" &&
+                !!t.due_at &&
+                new Date(t.due_at) < new Date(new Date().toDateString());
               return (
                 <tr key={t.id}>
                   <td>
@@ -188,11 +261,25 @@ export default function TasksPage() {
                       onChange={() => toggleDone(t)}
                     />
                   </td>
+                  <td>
+                    <span
+                      className={priorityDot(t.priority || "normal")}
+                      title={t.priority || "normal"}
+                    />
+                  </td>
                   <td
                     className={t.status === "done" ? "task-title--done" : undefined}
                     style={{ fontWeight: 600 }}
                   >
                     {t.title}
+                    {(t.task_type || t.recurrence_rule) && (
+                      <span
+                        className="text-meta"
+                        style={{ display: "block", fontWeight: 400, marginTop: 2 }}
+                      >
+                        {[t.task_type, t.recurrence_rule].filter(Boolean).join(" · ")}
+                      </span>
+                    )}
                   </td>
                   <td className={`font-data${overdue ? " task-due--overdue" : ""}`}>
                     {t.due_at ? new Date(t.due_at).toLocaleDateString() : "—"}
@@ -211,7 +298,7 @@ export default function TasksPage() {
             })}
             {!tasks.length && (
               <tr>
-                <td colSpan={4} className="empty-row">
+                <td colSpan={5} className="empty-row">
                   No tasks yet. Add one above.
                 </td>
               </tr>
