@@ -23,6 +23,15 @@ export default function ContactInspector({
 
   useEffect(() => {
     if (!contactId) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [contactId, onClose]);
+
+  useEffect(() => {
+    if (!contactId) return;
     const load = async () => {
       const supabase = createClient();
       const { data } = await supabase
@@ -87,14 +96,14 @@ export default function ContactInspector({
       <div className="inspector-backdrop" onClick={onClose} />
       <aside className="inspector-panel">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-medium">Contact</h2>
-          <button type="button" className="app-btn" onClick={onClose}>
+          <h2 className="app-section-title">Contact</h2>
+          <button type="button" className="app-btn" onClick={onClose} aria-label="Close">
             <X size={16} />
           </button>
         </div>
         {contact ? (
           <div className="space-y-3">
-            <label className="block text-xs" style={{ color: "var(--text-muted)" }}>
+            <label className="field-label">
               Name
               <input
                 className="app-input mt-1"
@@ -102,7 +111,7 @@ export default function ContactInspector({
                 onChange={(e) => setContact({ ...contact, name: e.target.value })}
               />
             </label>
-            <label className="block text-xs" style={{ color: "var(--text-muted)" }}>
+            <label className="field-label">
               Email
               <input
                 className="app-input mt-1 font-data"
@@ -110,7 +119,7 @@ export default function ContactInspector({
                 onChange={(e) => setContact({ ...contact, email: e.target.value })}
               />
             </label>
-            <label className="block text-xs" style={{ color: "var(--text-muted)" }}>
+            <label className="field-label">
               Phone
               <input
                 className="app-input mt-1 font-data"
@@ -118,7 +127,7 @@ export default function ContactInspector({
                 onChange={(e) => setContact({ ...contact, phone: e.target.value })}
               />
             </label>
-            <label className="block text-xs" style={{ color: "var(--text-muted)" }}>
+            <label className="field-label">
               Company
               <input
                 className="app-input mt-1"
@@ -126,7 +135,7 @@ export default function ContactInspector({
                 onChange={(e) => setContact({ ...contact, company: e.target.value })}
               />
             </label>
-            <label className="block text-xs" style={{ color: "var(--text-muted)" }}>
+            <label className="field-label">
               Timezone (manual)
               <input
                 className="app-input mt-1 font-data"
@@ -148,7 +157,7 @@ export default function ContactInspector({
             </button>
 
             <div className="pt-4 border-t" style={{ borderColor: "var(--border)" }}>
-              <h3 className="text-sm font-medium mb-2">Activity</h3>
+              <div className="app-label" style={{ marginBottom: 10 }}>Activity</div>
               <textarea
                 className="app-input"
                 style={{ height: 72, paddingTop: 8 }}
@@ -175,7 +184,12 @@ export default function ContactInspector({
             </div>
           </div>
         ) : (
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading…</p>
+          <div className="space-y-3" aria-busy="true" aria-label="Loading contact">
+            <div className="skeleton-line" style={{ width: "60%" }} />
+            <div className="skeleton-line" style={{ width: "85%" }} />
+            <div className="skeleton-line" style={{ width: "70%" }} />
+            <div className="skeleton-line" style={{ width: "90%" }} />
+          </div>
         )}
       </aside>
     </>

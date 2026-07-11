@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import ErrorBanner from "@/components/app/ErrorBanner";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Clock3 } from "lucide-react";
 
 type Activity = {
   id: string;
@@ -93,29 +93,29 @@ export default function ActivityPage() {
                       {a.contacts.name}
                     </Link>
                   )}
-                  <span className="text-xs" style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
+                  <span className="text-xs text-meta">
                     {new Date(a.created_at).toLocaleString()}
                   </span>
                 </div>
-                {a.body && (
-                  <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
-                    {a.body}
-                  </p>
-                )}
+                {a.body && <p className="mt-2 text-sm text-meta">{a.body}</p>}
               </div>
             ))}
             {!items.length && (
-              <p className="text-sm" style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
-                No activity yet.
-              </p>
+              <div className="empty-inline">
+                <div className="empty-inline-icon">
+                  <Clock3 size={20} strokeWidth={1.5} />
+                </div>
+                <p className="empty-row">No activity yet.</p>
+              </div>
             )}
           </div>
         </div>
 
         <div className="app-card p-5 space-y-4">
-          <h2 className="app-section-title">My tasks</h2>
-          <p className="text-sm" style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
-            {openTaskCount} open task{openTaskCount === 1 ? "" : "s"} assigned to you.
+          <div className="app-label">My tasks</div>
+          <div className="app-stat-value font-data">{openTaskCount}</div>
+          <p className="text-sm text-meta">
+            open task{openTaskCount === 1 ? "" : "s"} assigned to you.
           </p>
           <Link href="/app/tasks" className="app-btn app-btn-primary" style={{ width: "100%" }}>
             Open Tasks <ArrowRight size={14} />

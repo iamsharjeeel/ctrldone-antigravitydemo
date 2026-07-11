@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { X } from "lucide-react";
 
 export default function ErrorBanner({
   message,
@@ -15,7 +16,7 @@ export default function ErrorBanner({
       <span>{message}</span>
       {onDismiss && (
         <button type="button" onClick={onDismiss} aria-label="Dismiss">
-          ×
+          <X size={14} />
         </button>
       )}
     </div>

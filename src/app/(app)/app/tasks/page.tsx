@@ -120,17 +120,19 @@ export default function TasksPage() {
           <h1 className="app-page-title">Tasks</h1>
           <p className="app-page-sub">Create and track work across your team.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="segmented">
           <button
             type="button"
-            className={`app-btn ${filter === "mine" ? "app-btn-primary" : ""}`}
+            className="segmented-btn"
+            data-active={filter === "mine"}
             onClick={() => setFilter("mine")}
           >
             Mine
           </button>
           <button
             type="button"
-            className={`app-btn ${filter === "team" ? "app-btn-primary" : ""}`}
+            className="segmented-btn"
+            data-active={filter === "team"}
             onClick={() => setFilter("team")}
           >
             Team
@@ -174,40 +176,42 @@ export default function TasksPage() {
             </tr>
           </thead>
           <tbody>
-            {tasks.map((t) => (
-              <tr key={t.id}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={t.status === "done"}
-                    onChange={() => toggleDone(t)}
-                  />
-                </td>
-                <td
-                  style={{
-                    textDecoration: t.status === "done" ? "line-through" : "none",
-                    fontWeight: 600,
-                  }}
-                >
-                  {t.title}
-                </td>
-                <td className="font-data">
-                  {t.due_at ? new Date(t.due_at).toLocaleDateString() : "—"}
-                </td>
-                <td>
-                  <span
-                    className={`status-pill ${
-                      t.status === "done" ? "status-pill-lime" : "status-pill-blue"
-                    }`}
+            {tasks.map((t) => {
+              const overdue =
+                t.status !== "done" && !!t.due_at && new Date(t.due_at) < new Date(new Date().toDateString());
+              return (
+                <tr key={t.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={t.status === "done"}
+                      onChange={() => toggleDone(t)}
+                    />
+                  </td>
+                  <td
+                    className={t.status === "done" ? "task-title--done" : undefined}
+                    style={{ fontWeight: 600 }}
                   >
-                    {t.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
+                    {t.title}
+                  </td>
+                  <td className={`font-data${overdue ? " task-due--overdue" : ""}`}>
+                    {t.due_at ? new Date(t.due_at).toLocaleDateString() : "—"}
+                  </td>
+                  <td>
+                    <span
+                      className={`status-pill ${
+                        t.status === "done" ? "status-pill-lime" : "status-pill-blue"
+                      }`}
+                    >
+                      {t.status}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
             {!tasks.length && (
               <tr>
-                <td colSpan={4} style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
+                <td colSpan={4} className="empty-row">
                   No tasks yet. Add one above.
                 </td>
               </tr>

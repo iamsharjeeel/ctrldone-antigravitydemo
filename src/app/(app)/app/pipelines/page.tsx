@@ -43,6 +43,7 @@ export default function PipelinesPage() {
     staleOnly: false,
   });
   const [error, setError] = useState<string | null>(null);
+  const [dragOverStage, setDragOverStage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const supabase = createClient();
@@ -304,9 +305,14 @@ export default function PipelinesPage() {
           return (
             <div
               key={stage.id}
-              className="kanban-col"
-              onDragOver={(e) => e.preventDefault()}
+              className={`kanban-col${dragOverStage === stage.id ? " drag-over" : ""}`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                if (dragOverStage !== stage.id) setDragOverStage(stage.id);
+              }}
+              onDragLeave={() => setDragOverStage((s) => (s === stage.id ? null : s))}
               onDrop={(e) => {
+                setDragOverStage(null);
                 const id = e.dataTransfer.getData("text/deal-id");
                 if (id) moveDeal(id, stage.id);
               }}
@@ -316,8 +322,7 @@ export default function PipelinesPage() {
                   {stage.name} {column.length}
                 </span>
                 <span
-                  className="kanban-col-meta"
-                  style={isWon ? { color: "var(--forest)" } : undefined}
+                  className={`kanban-col-meta${isWon ? " kanban-col-meta--won" : ""}`}
                 >
                   {total.toLocaleString(undefined, {
                     style: "currency",
@@ -334,18 +339,13 @@ export default function PipelinesPage() {
                       key={deal.id}
                       draggable
                       onDragStart={(e) => e.dataTransfer.setData("text/deal-id", deal.id)}
-                      className="deal-card"
-                      style={
-                        isWon
-                          ? { borderLeft: "3px solid var(--forest)" }
-                          : undefined
-                      }
+                      className={`deal-card${isWon ? " deal-card--won" : ""}`}
                     >
                       <div className="flex items-center gap-2 deal-card-meta mb-2">
                         <span
                           className={isWon ? "stage-dot stage-dot-won" : "stage-dot"}
                         />
-                        {deal.contacts?.company || "Deal"}
+                        {deal.contacts?.company || "—"}
                       </div>
                       <Link href={`/app/deals/${deal.id}`} className="deal-card-title">
                         {deal.title}
@@ -372,6 +372,9 @@ export default function PipelinesPage() {
                     </div>
                   );
                 })}
+                {!column.length && (
+                  <div className="kanban-empty">No deals in this stage</div>
+                )}
               </div>
             </div>
           );
