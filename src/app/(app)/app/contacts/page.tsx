@@ -240,8 +240,18 @@ export default function ContactsPage() {
     }
     setShowCreate(false);
     setForm({ name: "", email: "", company: "" });
-    if (data?.id) router.push(`/app/contacts/${data.id}`);
-    else load();
+    if (data?.id) {
+      void fetch("/api/webhooks/emit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orgId,
+          event: "contact.created",
+          payload: { contact: { id: data.id, name: form.name.trim(), email } },
+        }),
+      });
+      router.push(`/app/contacts/${data.id}`);
+    } else load();
   };
 
   const onCsv = (file: File) => {

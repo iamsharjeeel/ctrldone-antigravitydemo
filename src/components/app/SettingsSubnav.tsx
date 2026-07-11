@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const links = [
   { href: "/app/settings/email", label: "Email" },
+  { href: "/app/settings/sms", label: "SMS" },
   { href: "/app/settings/templates", label: "Templates" },
   { href: "/app/settings/fields", label: "Fields" },
   { href: "/app/settings/pipelines", label: "Pipelines" },
@@ -14,6 +15,9 @@ const links = [
   { href: "/app/settings/forms", label: "Forms" },
   { href: "/app/settings/notifications", label: "Notifications" },
   { href: "/app/settings/suppression", label: "Suppression" },
+  { href: "/app/settings/api", label: "API" },
+  { href: "/app/settings/webhooks", label: "Webhooks" },
+  { href: "/app/settings/billing", label: "Billing" },
   { href: "/app/settings/audit", label: "Audit" },
   { href: "/app/settings/org", label: "Organization" },
   { href: "/app/settings/team", label: "Team" },

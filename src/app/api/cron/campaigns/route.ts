@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { addWait } from "@/lib/timezone";
 import { applyMergeTags, sendViaAccount } from "@/lib/email/send";
+import { sendViaSmsAccount } from "@/lib/sms/send";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -180,7 +181,11 @@ export async function GET(req: NextRequest) {
 
       await admin
         .from("campaign_sends")
-        .update({ status: "sent", provider_message_id: result.id || null })
+        .update({
+          status: "sent",
+          provider_message_id: result.id ? result.id.toLowerCase() : null,
+          provider_thread_id: result.threadId || null,
+        })
         .eq("enrollment_id", enrollment.id)
         .eq("step_id", step.id);
 
@@ -207,7 +212,66 @@ export async function GET(req: NextRequest) {
     }
 
     if (step.type === "sms") {
-      if (!process.env.TWILIO_ACCOUNT_SID) {
+      if (!contact.phone) {
+        await admin.from("campaign_sends").insert({
+          org_id: enrollment.org_id,
+          enrollment_id: enrollment.id,
+          step_id: step.id,
+          status: "failed",
+          error: "missing_phone",
+        });
+        await admin
+          .from("campaign_enrollments")
+          .update({ status: "failed", locked_at: null })
+          .eq("id", enrollment.id);
+        continue;
+      }
+
+      if (contact.email) {
+        const { data: suppressed } = await admin
+          .from("suppression_list")
+          .select("id")
+          .eq("org_id", enrollment.org_id)
+          .ilike("email", contact.email)
+          .maybeSingle();
+        if (suppressed) {
+          await admin
+            .from("campaign_enrollments")
+            .update({ status: "exited", locked_at: null })
+            .eq("id", enrollment.id);
+          continue;
+        }
+      }
+
+      const { data: smsAccount } = await admin
+        .from("sms_accounts")
+        .select("*")
+        .eq("org_id", enrollment.org_id)
+        .limit(1)
+        .maybeSingle();
+
+      if (!smsAccount) {
+        await admin.from("campaign_sends").insert({
+          org_id: enrollment.org_id,
+          enrollment_id: enrollment.id,
+          step_id: step.id,
+          status: "failed",
+          error: "no_sms_account",
+        });
+        await admin
+          .from("campaign_enrollments")
+          .update({ status: "failed", locked_at: null })
+          .eq("id", enrollment.id);
+        continue;
+      }
+
+      const { error: smsInsertErr } = await admin.from("campaign_sends").insert({
+        org_id: enrollment.org_id,
+        enrollment_id: enrollment.id,
+        step_id: step.id,
+        status: "sending",
+      });
+      if (smsInsertErr) {
         await admin
           .from("campaign_enrollments")
           .update({
@@ -219,7 +283,52 @@ export async function GET(req: NextRequest) {
           .eq("id", enrollment.id);
         continue;
       }
+
+      const smsResult = await sendViaSmsAccount({
+        account: smsAccount,
+        to: contact.phone,
+        body: applyMergeTags(String(step.config.body || ""), contact),
+      });
+
+      if (!smsResult.ok) {
+        await admin
+          .from("campaign_sends")
+          .update({ status: "failed", error: smsResult.error })
+          .eq("enrollment_id", enrollment.id)
+          .eq("step_id", step.id);
+        await admin
+          .from("campaign_enrollments")
+          .update({ status: "failed", locked_at: null })
+          .eq("id", enrollment.id);
+        continue;
+      }
+
+      await admin
+        .from("campaign_sends")
+        .update({ status: "sent", provider_message_id: smsResult.id || null })
+        .eq("enrollment_id", enrollment.id)
+        .eq("step_id", step.id);
+
+      await admin.from("activities").insert({
+        org_id: enrollment.org_id,
+        contact_id: contact.id,
+        type: "note",
+        body: "Campaign SMS sent",
+        meta: { campaign_id: campaign.id, step_id: step.id, channel: "sms" },
+      });
+
+      const smsDone = !step.next_step_id;
+      await admin
+        .from("campaign_enrollments")
+        .update({
+          status: smsDone ? "completed" : "pending",
+          current_step_id: step.next_step_id,
+          next_run_at: smsDone ? null : now,
+          locked_at: null,
+        })
+        .eq("id", enrollment.id);
       processed++;
+      continue;
     }
 
     if (step.type === "condition") {

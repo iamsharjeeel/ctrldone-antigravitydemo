@@ -475,15 +475,22 @@ export default function CampaignBuilderPage() {
                 </label>
               )}
               {s.type === "sms" && (
-                <textarea
-                  className="app-input"
-                  style={{ height: 64, paddingTop: 8 }}
-                  disabled={locked}
-                  value={String(s.config.body || "")}
-                  onChange={(e) =>
-                    updateStepConfig(s.id, { ...s.config, body: e.target.value })
-                  }
-                />
+                <div className="space-y-1">
+                  <textarea
+                    className="app-input"
+                    style={{ height: 64, paddingTop: 8 }}
+                    disabled={locked}
+                    value={String(s.config.body || "")}
+                    onChange={(e) =>
+                      updateStepConfig(s.id, { ...s.config, body: e.target.value })
+                    }
+                    placeholder="SMS body — {{first_name}} supported"
+                  />
+                  <p className="text-xs font-data" style={{ color: "var(--text-muted)" }}>
+                    {String(s.config.body || "").length}/160
+                    {String(s.config.body || "").length > 160 ? " (multi-segment)" : ""}
+                  </p>
+                </div>
               )}
               {s.type === "condition" && (
                 <p className="text-xs" style={{ color: "var(--text-muted)" }}>

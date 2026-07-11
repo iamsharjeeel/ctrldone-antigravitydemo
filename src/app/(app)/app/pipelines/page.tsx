@@ -212,6 +212,20 @@ export default function PipelinesPage() {
       contactId: deal.contact_id,
       ownerId: deal.owner_id,
     });
+    void fetch("/api/webhooks/emit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orgId,
+        event: "deal.stage_changed",
+        payload: {
+          deal_id: dealId,
+          from: deal.stage_id,
+          to: stageId,
+          stage_name: stageName,
+        },
+      }),
+    });
     load();
   };
 

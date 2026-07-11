@@ -12,6 +12,7 @@ export default function OrgSettingsPage() {
     business_hours_start: "09:00",
     business_hours_end: "18:00",
     stale_deal_days: 14,
+    visibility_mode: "open" as "open" | "owner_scoped",
   });
   const [saved, setSaved] = useState(false);
 
@@ -29,7 +30,7 @@ export default function OrgSettingsPage() {
         .limit(1)
         .maybeSingle();
       if (!mem?.orgs) return;
-      const o = mem.orgs as unknown as typeof org;
+      const o = mem.orgs as unknown as typeof org & { visibility_mode?: string };
       setOrg({
         id: o.id,
         name: o.name,
@@ -37,6 +38,8 @@ export default function OrgSettingsPage() {
         business_hours_start: String(o.business_hours_start).slice(0, 5),
         business_hours_end: String(o.business_hours_end).slice(0, 5),
         stale_deal_days: o.stale_deal_days,
+        visibility_mode:
+          o.visibility_mode === "owner_scoped" ? "owner_scoped" : "open",
       });
     };
     load();
@@ -55,6 +58,7 @@ export default function OrgSettingsPage() {
         business_hours_start: org.business_hours_start,
         business_hours_end: org.business_hours_end,
         stale_deal_days: org.stale_deal_days,
+        visibility_mode: org.visibility_mode,
       })
       .eq("id", org.id);
     if (updateErr) {
@@ -117,6 +121,24 @@ export default function OrgSettingsPage() {
               setOrg({ ...org, stale_deal_days: Number(e.target.value) })
             }
           />
+        </label>
+        <label className="text-xs block" style={{ color: "var(--text-muted)" }}>
+          Record visibility
+          <select
+            className="app-input mt-1"
+            value={org.visibility_mode}
+            onChange={(e) =>
+              setOrg({
+                ...org,
+                visibility_mode: e.target.value as "open" | "owner_scoped",
+              })
+            }
+          >
+            <option value="open">Open — all members see all records</option>
+            <option value="owner_scoped">
+              Owner-scoped — members only see owned/assigned records
+            </option>
+          </select>
         </label>
         <button type="button" className="app-btn app-btn-primary" onClick={save}>
           Save

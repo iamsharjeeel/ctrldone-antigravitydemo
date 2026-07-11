@@ -2,7 +2,7 @@
 
 ## One-line status
 
-Branch `feature/roadmap-core-batch`: ROADMAP #13 booking links · #15 embeddable forms (plus prior #1–#12/#18–#19 and parallel #3/#8). Apply migrations `20260711072000_booking_pages.sql` + `20260711072100_forms.sql` (and earlier through `20260711071000` if needed).
+Branch `feature/roadmap-core-batch`: ROADMAP #14 SMS · #16 API/webhooks · #17 visibility RLS · #20 billing · #13 booking · #15 forms (plus prior). Apply migrations through `20260711073300_subscriptions.sql`.
 
 ## Manual steps (do now if Google needed)
 
@@ -11,10 +11,11 @@ Branch `feature/roadmap-core-batch`: ROADMAP #13 booking links · #15 embeddable
    - `http://127.0.0.1:54321/auth/v1/callback` (Supabase Auth login)
    - `http://localhost:3000/api/oauth/google/callback` (Gmail send connect)
 3. Restart local Supabase after setting Google env: `npx supabase stop` → `npx supabase start`.
-4. Apply migrations `20260711072000`–`20260711072100` (booking + forms). Also `20260711071000_reply_detection.sql` and earlier `20260711070000`–`20260711070600` if not applied.
+4. Apply migrations through `20260711073300` (includes booking/forms `72000`–`72100`, SMS/API/visibility/billing `73000`–`73300`, reply detection `71000`, and earlier `70000`–`70600` if needed).
 5. **Reconnect Gmail** accounts after deploy — OAuth scope now includes `gmail.readonly` for inbox poll; existing tokens with only `gmail.send` will fail poll until reauth.
 6. Optional: set `BOUNCE_WEBHOOK_SECRET` for `/api/email/bounce-webhook` (else uses `CRON_SECRET`).
 7. Booking: Settings → Booking → set slug → public `/book/{slug}`. Forms: Settings → Forms → save → hosted `/f/{id}` or embed snippet.
+8. Optional: `TOKEN_ENCRYPTION_KEY` (SMS tokens), Twilio via Settings → SMS, Stripe (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, price IDs) for billing.
 
 ## Local stack
 
@@ -75,6 +76,7 @@ Source session: App UI polish + 10 features. Keep these as the visual north star
 
 ## What changed (this pass)
 
+- **ROADMAP #14/#16/#17/#20:** `sms_accounts` + Settings → SMS + cron SMS; `api_keys`/`webhook_subscriptions` + `/api/v1/*` + Settings → API/Webhooks; `orgs.visibility_mode` + owner-scoped RLS; `subscriptions` + Stripe checkout/portal/webhook + Settings → Billing + seat gate
 - **ROADMAP #13/#15:** `booking_pages`/`bookings` + `create_booking`/`get_booking_page`; public `/book/[slug]`; Settings → Booking; `forms`/`form_submissions` + `submit_form`/`get_form`; Settings → Forms; hosted `/f/[id]`; `public/embed.js`
 - **ROADMAP #3/#8:** `cron/inbox-poll` (Gmail reply + bounce → `email_replied` / `suppression_list`); `email/bounce-webhook`; `provider_thread_id` + `last_synced_at`; campaigns already skip suppressed emails
 - **ROADMAP #2/#4/#18/#19 (batch B):** campaign builder stats; `merge_contacts` + bulk Merge + duplicate badge; `automation_rules` + Settings → Automations + `moveDeal` hook; `activity_comments` + Reply/@mentions
@@ -85,11 +87,11 @@ Source session: App UI polish + 10 features. Keep these as the visual north star
 - **Brand:** `Logo` in AppShell + login; lime/blue badge tokens restored under app/login shells
 - **Type:** Poppins (400–700); clearer hierarchy; no Playfair/Inter in CRM
 - **Shape:** cards 16px; buttons/inputs/search pills
-- **Nav:** Dashboard · Contacts · Pipeline · **Tasks** · Activity · **Reports**; settings include Scoring + Notifications + Booking + Forms
+- **Nav:** Dashboard · Contacts · Pipeline · **Tasks** · Activity · **Reports**; settings include Scoring + Notifications + Booking + Forms + SMS/API/Webhooks/Billing
 - **Pipeline:** richer deal cards (contact, close, days in stage); filters; contact picker on create
 - **Contacts:** real filters, CSV as Import, ContactInspector, bulk enroll/tag/export
 - **Contact detail:** score, deals, custom fields, in-app email compose + templates
-- **Settings:** Templates, Fields, Pipelines, Automations, Scoring, Booking, Forms, Notifications, Suppression, Audit pages
+- **Settings:** Templates, Fields, Pipelines, Automations, Scoring, Booking, Forms, Notifications, Suppression, SMS, API, Webhooks, Billing, Audit pages
 - **Activity:** timeline + replies/comments + “Open Tasks” link (no duplicate task create sidebar)
 - **Docs:** `DESIGN_SYSTEM.md`, `ROADMAP.md`, `.cursor/rules/*`
 

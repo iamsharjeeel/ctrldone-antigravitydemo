@@ -46,6 +46,19 @@ export async function ensureOrg() {
     .maybeSingle();
 
   if (membership?.org_id) {
+    const { data: sub } = await supabase
+      .from("subscriptions")
+      .select("id")
+      .eq("org_id", membership.org_id)
+      .maybeSingle();
+    if (!sub) {
+      await supabase.from("subscriptions").insert({
+        org_id: membership.org_id,
+        plan: "trial",
+        seat_limit: 3,
+        status: "trialing",
+      });
+    }
     return { orgId: membership.org_id as string, error: null as string | null };
   }
 
@@ -57,6 +70,18 @@ export async function ensureOrg() {
 
   if (error) {
     return { orgId: null as string | null, error: error.message };
+  }
+
+  if (data) {
+    await supabase.from("subscriptions").upsert(
+      {
+        org_id: data as string,
+        plan: "trial",
+        seat_limit: 3,
+        status: "trialing",
+      },
+      { onConflict: "org_id" }
+    );
   }
 
   return { orgId: data as string, error: null as string | null };
