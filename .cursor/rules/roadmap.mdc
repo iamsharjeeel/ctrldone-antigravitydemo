@@ -1,0 +1,34 @@
+---
+description: Feature roadmap guardrails for CTRLDONE — read before building any new feature
+globs: "src/**/*,supabase/**/*"
+alwaysApply: true
+---
+
+Before implementing any new feature (new page, new table, new API route, new
+background job), read `ROADMAP.md` at the repo root. It's a build-ready spec for the
+next 20 planned features — schema, backend, and UI plan per feature, grounded in the
+actual code in this repo. If the task at hand matches one of those 20, follow its
+plan rather than re-deriving an approach from scratch; if it deviates from the plan
+in a meaningful way, say so before proceeding rather than silently diverging.
+
+Non-negotiable conventions (see `ROADMAP.md`'s intro for the full rationale):
+
+1. **One feature per branch/PR.** Don't bundle unrelated features together.
+2. **New migrations only** — never edit a migration file that already shipped
+   (anything in `supabase/migrations/` older than
+   `20260711030100_grant_table_privileges.sql`). Add a new timestamped file instead,
+   even for a one-column change.
+3. **Every new table** gets `org_id uuid not null references public.orgs(id) on
+   delete cascade`, an `updated_at` trigger via `public.set_updated_at()`, RLS
+   enabled, and the standard org-scoped policy:
+   `using (public.is_org_member(org_id)) with check (public.is_org_member(org_id))`.
+   Copy an existing table's block in the migration rather than improvising a new
+   RLS pattern.
+4. **Org resolution** in any new page/query follows the existing pattern in
+   `src/lib/org.ts` (`getMembership()`/`ensureOrg()`) or the inline
+   `org_members` lookup repeated across the existing CRM pages — don't invent a
+   parallel auth/org-resolution path.
+5. **Service role (`createAdminClient()` in `src/lib/supabase/admin.ts`) is
+   server-only** — cron routes and other trusted server code, never a client
+   component.
+6. **UI** follows `DESIGN_SYSTEM.md` — see `.cursor/rules/design-system.mdc`.
