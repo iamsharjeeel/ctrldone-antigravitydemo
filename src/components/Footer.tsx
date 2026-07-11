@@ -5,7 +5,7 @@ import Logo from "@/components/Logo";
 
 export default function Footer() {
   return (
-    <footer className="px-6 md:px-12 lg:px-24 py-16 border-t border-hairline bg-surface relative z-10 select-none">
+    <footer className="page-x py-16 border-t border-hairline bg-surface relative z-10 select-none">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
         
         {/* Logo and Tagline */}

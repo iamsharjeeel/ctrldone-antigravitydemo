@@ -3,8 +3,6 @@
 import React from "react";
 import { Compass, Palette, TrendingUp, Cpu } from "lucide-react";
 
-
-
 const servicesList = [
   {
     icon: Compass,
@@ -36,39 +34,30 @@ export default function Services() {
   return (
     <section
       id="services"
-      className="px-6 md:px-12 lg:px-24 py-24 md:py-32 relative max-w-6xl mx-auto"
+      className="page-x section-pad relative max-w-6xl mx-auto"
     >
       <div className="reveal-el mb-12 text-left">
-        <span className="inline-block text-xs font-mono tracking-[0.16em] text-blue uppercase mb-4">
+        <span className="eyebrow">
           {"// capabilities"}
         </span>
-        <h2 className="text-[clamp(2rem,3.6vw,3rem)] font-light leading-[1.1] text-text mb-6 tracking-[-0.02em]">
+        <h2 className="section-heading !mb-0">
           What we <span className="font-bold text-blue">run</span>.
         </h2>
       </div>
 
-      {/* 2x2 Console Panels Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {servicesList.map((service, index) => {
           const Icon = service.icon;
           return (
             <div
               key={index}
-              className="group relative flex flex-col items-start p-8 md:p-10 bg-surface rounded-sm border border-hairline transition-all duration-300 hover:bg-surface-hover select-none"
+              className="group relative flex flex-col items-start p-8 h-full bg-surface rounded-sm border border-hairline transition-all duration-300 hover:bg-surface-hover hover:border-blue/40 hover:-translate-y-0.5 select-none"
             >
-              {/* Corner Viewfinder Brackets */}
-              <div className="corner-bracket corner-bracket-tl" />
-              <div className="corner-bracket corner-bracket-tr" />
-              <div className="corner-bracket corner-bracket-bl" />
-              <div className="corner-bracket corner-bracket-br" />
-
-              {/* Top-Left Monospace Tag */}
-              <span className="absolute top-4 left-4 font-mono text-[11px] text-text-muted select-none">
+              <span className="font-mono text-[11px] text-text-muted select-none mb-4">
                 {service.tag}
               </span>
 
-              {/* Icon */}
-              <div className="text-blue mt-4 mb-6 group-hover:scale-105 transition-transform duration-300">
+              <div className="text-blue mb-6 group-hover:scale-105 transition-transform duration-300">
                 <Icon size={32} strokeWidth={1.5} aria-hidden="true" />
               </div>
 

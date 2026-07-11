@@ -16,6 +16,18 @@
   --shadow-md: none;
   --shadow-lg: none;
   --shadow-lime: none;
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 48px;
+  --space-6: 64px;
+  --space-7: 96px;
+  --space-8: 128px;
+
+  --space-section: 128px;
+  --space-section-mobile: 64px;
 }
 
 :root[data-theme="dark"] {
@@ -121,6 +133,70 @@ a, button, input, textarea {
 .reveal-el {
   opacity: 0;
   will-change: transform, opacity;
+}
+
+.section-pad {
+  padding-top: var(--space-section-mobile);
+  padding-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .section-pad {
+    padding-top: var(--space-section);
+  }
+}
+
+main > section:last-child {
+  padding-bottom: var(--space-section-mobile);
+}
+
+@media (min-width: 768px) {
+  main > section:last-child {
+    padding-bottom: var(--space-section);
+  }
+}
+
+#hero {
+  padding-top: 8rem;
+  padding-bottom: 0;
+}
+
+.page-x {
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .page-x {
+    padding-left: var(--space-5);
+    padding-right: var(--space-5);
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-x {
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+  }
+}
+
+.eyebrow {
+  display: inline-block;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--signal-blue);
+  margin-bottom: var(--space-2);
+}
+
+.section-heading {
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: var(--space-3);
 }
 
 /* Nav backdrop-blur transitions */

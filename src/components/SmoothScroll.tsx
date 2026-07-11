@@ -8,7 +8,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
-    // Disable smooth scroll if user prefers reduced motion
+    if (document.documentElement.getAttribute("data-shell") === "app") return;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 

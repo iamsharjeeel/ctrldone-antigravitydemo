@@ -117,16 +117,11 @@ export default function IntakeModal({ isOpen, onClose }: IntakeModalProps) {
     };
 
     try {
-      const response = await fetch(
-        "https://services.leadconnectorhq.com/hooks/ELmgviKqKUd3zxoPoph4/webhook-trigger/2ee31b0a-dacb-421b-a1e3-b779b97b195a",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch("/api/intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       if (response.ok) {
         setStatus("success");
